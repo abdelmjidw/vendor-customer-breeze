@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { ProductProps } from "@/components/ProductCard";
 import { toast } from "sonner";
+import { useWhatsAppAuth } from "@/hooks/useWhatsAppAuth";
 
 // Mock data for demonstration
 const mockSellerProducts: ProductProps[] = [
@@ -68,14 +68,22 @@ const mockSellerProducts: ProductProps[] = [
 ];
 
 const SellerDashboard = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [showVerification, setShowVerification] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { 
+    isAuthenticated, 
+    isLoading, 
+    phoneNumber, 
+    verificationCode,
+    showVerification,
+    setPhoneNumber,
+    setVerificationCode,
+    handleSendCode,
+    handleVerifyCode,
+    handleLogout
+  } = useWhatsAppAuth();
+
+  const [showPassword, setShowPassword] = useState(false);
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,35 +93,14 @@ const SellerDashboard = () => {
     }
   }, [isAuthenticated]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API call for sending verification code
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowVerification(true);
-      toast.success("Verification code sent to your WhatsApp");
-    }, 1500);
+    await handleSendCode();
   };
 
-  const handleVerifyCode = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API call for verifying code
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsAuthenticated(true);
-      toast.success("Login successful");
-    }, 1500);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setShowVerification(false);
-    setPhone("");
-    setVerificationCode("");
+    await handleVerifyCode();
   };
 
   const handleDeleteProduct = (id: string) => {
@@ -150,8 +137,8 @@ const SellerDashboard = () => {
                       id="phone"
                       type="tel"
                       placeholder="212 6XX XXX XXX"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
                       className="pl-12"
                       required
                     />
@@ -173,7 +160,7 @@ const SellerDashboard = () => {
                 </Button>
               </form>
             ) : (
-              <form onSubmit={handleVerifyCode} className="space-y-6">
+              <form onSubmit={handleVerify} className="space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="code" className="block text-sm font-medium">
                     Verification Code
@@ -201,7 +188,7 @@ const SellerDashboard = () => {
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Enter the code sent to +{phone}
+                    Enter the code sent to +{phoneNumber}
                   </p>
                 </div>
                 
@@ -209,16 +196,17 @@ const SellerDashboard = () => {
                   <button
                     type="button"
                     className="text-sm text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowVerification(false)}
+                    onClick={() => setPhoneNumber("")}
                   >
                     Change number
                   </button>
                   <button
                     type="button"
                     className="text-sm text-muted-foreground hover:text-foreground"
-                    onClick={() => {
-                      toast.info("New code sent");
+                    onClick={async () => {
+                      await handleSendCode();
                       setVerificationCode("");
+                      toast.info("New code sent");
                     }}
                   >
                     Resend code
@@ -439,7 +427,7 @@ const SellerDashboard = () => {
                     <div className="relative">
                       <Input
                         id="whatsapp"
-                        defaultValue="212600000000"
+                        defaultValue={phoneNumber}
                         className="pl-8"
                       />
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">

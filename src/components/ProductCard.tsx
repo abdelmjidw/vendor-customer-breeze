@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { sendWhatsAppMessage } from "@/services/whatsappService";
 
 export interface ProductProps {
   id: string;
@@ -39,6 +40,13 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
 
   const handleImageLoad = () => {
     setIsImageLoaded(true);
+  };
+
+  const handleWhatsAppOrder = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const message = `Hello, I'm interested in your product: ${product.title}`;
+    await sendWhatsAppMessage(product.seller.whatsapp, message);
   };
 
   return (
@@ -83,10 +91,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
           </div>
           <Button 
             className="mt-4 w-full btn-whatsapp"
-            onClick={(e) => {
-              e.preventDefault();
-              window.open(`https://wa.me/${product.seller.whatsapp}?text=Hello, I'm interested in your product: ${product.title}`, '_blank');
-            }}
+            onClick={handleWhatsAppOrder}
           >
             Order on WhatsApp
           </Button>
