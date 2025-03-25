@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Navbar from "@/components/Navbar";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -7,38 +7,19 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Globe, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
-
-type Language = "fr" | "ar" | "en";
+import { LanguageContext, Language } from "../App";
 
 const Settings = () => {
-  const [language, setLanguage] = useState<Language>(() => {
-    // Get stored language or default to French
-    return (localStorage.getItem("app_language") as Language) || "fr";
-  });
+  const { language, setLanguage } = useContext(LanguageContext);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Apply language settings on mount and when changed
   useEffect(() => {
-    applyLanguageSettings(language);
-  }, [language]);
-
-  const applyLanguageSettings = (selectedLanguage: Language) => {
-    // Store language preference
-    localStorage.setItem("app_language", selectedLanguage);
-    
-    // Apply RTL for Arabic
-    if (selectedLanguage === "ar") {
-      document.documentElement.classList.add("rtl");
-      document.body.dir = "rtl";
-    } else {
-      document.documentElement.classList.remove("rtl");
-      document.body.dir = "ltr";
-    }
-  };
+    // Check for dark mode on component mount
+    setIsDarkMode(document.documentElement.classList.contains("dark"));
+  }, []);
 
   const handleLanguageChange = (value: Language) => {
     setLanguage(value);
-    applyLanguageSettings(value);
     toast.success(`Language changed to ${getLanguageName(value)}`);
   };
 

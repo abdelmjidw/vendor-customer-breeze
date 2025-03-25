@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [language, setLanguage] = useState<"fr" | "ar" | "en">("fr");
   const location = useLocation();
 
   useEffect(() => {
@@ -18,8 +19,48 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    // Get stored language on component mount
+    const savedLanguage = localStorage.getItem("app_language");
+    if (savedLanguage && ["fr", "ar", "en"].includes(savedLanguage)) {
+      setLanguage(savedLanguage as "fr" | "ar" | "en");
+    }
+  }, []);
+
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const getTranslatedNavText = (key: string) => {
+    const translations: Record<string, Record<string, string>> = {
+      home: {
+        fr: "Accueil",
+        ar: "الرئيسية",
+        en: "Home"
+      },
+      favorites: {
+        fr: "Favoris",
+        ar: "المفضلة",
+        en: "Favorites"
+      },
+      settings: {
+        fr: "Paramètres",
+        ar: "الإعدادات",
+        en: "Settings"
+      },
+      sell: {
+        fr: "Vendre",
+        ar: "بيع",
+        en: "Sell"
+      },
+      menu: {
+        fr: "Menu",
+        ar: "القائمة",
+        en: "Menu"
+      }
+    };
+
+    return translations[key]?.[language] || translations[key]?.en || key;
   };
 
   return (
@@ -41,19 +82,19 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center space-x-1">
             <NavLink to="/" isActive={isActive("/")}>
               <Home className="h-5 w-5" />
-              <span>Home</span>
+              <span>{getTranslatedNavText("home")}</span>
             </NavLink>
             <NavLink to="/favorites" isActive={isActive("/favorites")}>
               <Heart className="h-5 w-5" />
-              <span>Favorites</span>
+              <span>{getTranslatedNavText("favorites")}</span>
             </NavLink>
             <NavLink to="/settings" isActive={isActive("/settings")}>
               <Settings className="h-5 w-5" />
-              <span>Settings</span>
+              <span>{getTranslatedNavText("settings")}</span>
             </NavLink>
             <NavLink to="/seller/dashboard" isActive={isActive("/seller/dashboard")}>
               <ShoppingBag className="h-5 w-5" />
-              <span>Sell</span>
+              <span>{getTranslatedNavText("sell")}</span>
             </NavLink>
           </nav>
 
@@ -75,7 +116,7 @@ const Navbar = () => {
           <div className="fixed inset-y-0 right-0 w-3/4 max-w-sm glass shadow-lg animate-slide-in">
             <div className="flex flex-col h-full">
               <div className="p-4 flex justify-between items-center border-b border-border">
-                <span className="text-lg font-medium">Menu</span>
+                <span className="text-lg font-medium">{getTranslatedNavText("menu")}</span>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -92,7 +133,7 @@ const Navbar = () => {
                     isActive={isActive("/")}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Home
+                    {getTranslatedNavText("home")}
                   </MobileNavLink>
                   <MobileNavLink 
                     to="/favorites" 
@@ -100,7 +141,7 @@ const Navbar = () => {
                     isActive={isActive("/favorites")}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Favorites
+                    {getTranslatedNavText("favorites")}
                   </MobileNavLink>
                   <MobileNavLink 
                     to="/settings" 
@@ -108,7 +149,7 @@ const Navbar = () => {
                     isActive={isActive("/settings")}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Settings
+                    {getTranslatedNavText("settings")}
                   </MobileNavLink>
                   <MobileNavLink 
                     to="/seller/dashboard" 
@@ -116,7 +157,7 @@ const Navbar = () => {
                     isActive={isActive("/seller/dashboard")}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Sell
+                    {getTranslatedNavText("sell")}
                   </MobileNavLink>
                 </div>
               </nav>
