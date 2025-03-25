@@ -1,11 +1,11 @@
-
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Heart, MapPin, ArrowLeft, ChevronLeft, ChevronRight, Share2, ShoppingBag } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ProductProps } from "@/components/ProductCard";
+import { LanguageContext } from "@/App";
 
 // Mock data for demonstration
 const mockProducts: { [key: string]: ProductProps } = {
@@ -53,6 +53,7 @@ const ProductDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const { language } = useContext(LanguageContext);
 
   // In a real app, fetch product data from API
   const product = mockProducts[id || "1"];
@@ -125,6 +126,28 @@ const ProductDetail = () => {
     );
   };
 
+  const getWhatsAppButtonText = () => {
+    switch (language) {
+      case "fr":
+        return "Commander sur WhatsApp";
+      case "ar":
+        return "اطلب عبر واتساب";
+      default:
+        return "Order on WhatsApp";
+    }
+  };
+
+  const getBackToProductsText = () => {
+    switch (language) {
+      case "fr":
+        return "Retour aux produits";
+      case "ar":
+        return "العودة إلى المنتجات";
+      default:
+        return "Back to products";
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -136,7 +159,7 @@ const ProductDetail = () => {
             className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to products
+            {getBackToProductsText()}
           </Link>
         </div>
         
@@ -272,7 +295,7 @@ const ProductDetail = () => {
                 onClick={handleWhatsAppOrder}
               >
                 <ShoppingBag className="h-5 w-5 mr-2" />
-                Order on WhatsApp
+                {getWhatsAppButtonText()}
               </Button>
             </div>
           </div>

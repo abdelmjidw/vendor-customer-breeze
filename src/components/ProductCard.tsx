@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { sendWhatsAppMessage } from "@/services/whatsappService";
+import { LanguageContext } from "@/App";
 
 export interface ProductProps {
   id: string;
@@ -24,6 +25,7 @@ export interface ProductProps {
 const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const { language } = useContext(LanguageContext);
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,6 +49,17 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
     
     const message = `Hello, I'm interested in your product: ${product.title}`;
     await sendWhatsAppMessage(product.seller.whatsapp, message);
+  };
+
+  const getWhatsAppButtonText = () => {
+    switch (language) {
+      case "fr":
+        return "Commander sur WhatsApp";
+      case "ar":
+        return "اطلب عبر واتساب";
+      default:
+        return "Order on WhatsApp";
+    }
   };
 
   return (
@@ -93,7 +106,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
             className="mt-4 w-full btn-whatsapp"
             onClick={handleWhatsAppOrder}
           >
-            Order on WhatsApp
+            {getWhatsAppButtonText()}
           </Button>
         </div>
       </div>
