@@ -1,6 +1,6 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Search, ChevronDown, Filter } from "lucide-react";
+import { LanguageContext } from "@/App";
 import Navbar from "@/components/Navbar";
 import ProductCard, { ProductProps } from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
@@ -136,6 +136,7 @@ const mockProducts: ProductProps[] = [
   },
 ];
 
+// Categories and colors arrays
 const categories = [
   "All Categories",
   "Fashion",
@@ -158,14 +159,206 @@ const colors = [
   "Brown",
 ];
 
+// Translations for the Home page
+const translations = {
+  discoverTreasures: {
+    fr: "Découvrez des Trésors",
+    ar: "اكتشف الكنوز",
+    en: "Discover Treasures"
+  },
+  connectWithArtisans: {
+    fr: "Connectez-vous avec des artisans talentueux et des vendeurs à travers le Maroc. Trouvez des produits uniques et commandez directement via WhatsApp.",
+    ar: "تواصل مع الحرفيين الموهوبين والبائعين في جميع أنحاء المغرب. ابحث عن منتجات فريدة واطلب مباشرة عبر واتساب.",
+    en: "Connect with talented artisans and sellers across Morocco. Find unique products and order directly through WhatsApp."
+  },
+  searchProducts: {
+    fr: "Rechercher des produits...",
+    ar: "البحث عن المنتجات...",
+    en: "Search products..."
+  },
+  allCategories: {
+    fr: "Toutes les Catégories",
+    ar: "جميع الفئات",
+    en: "All Categories"
+  },
+  sortBy: {
+    fr: "Trier par: ",
+    ar: "ترتيب حسب: ",
+    en: "Sort by: "
+  },
+  newest: {
+    fr: "Plus Récent",
+    ar: "الأحدث",
+    en: "Newest"
+  },
+  priceLowToHigh: {
+    fr: "Prix: Bas à Élevé",
+    ar: "السعر: من الأقل إلى الأعلى",
+    en: "Price: Low to High"
+  },
+  priceHighToLow: {
+    fr: "Prix: Élevé à Bas",
+    ar: "السعر: من الأعلى إلى الأقل",
+    en: "Price: High to Low"
+  },
+  filters: {
+    fr: "Filtres",
+    ar: "فلاتر",
+    en: "Filters"
+  },
+  priceRange: {
+    fr: "Gamme de Prix",
+    ar: "نطاق السعر",
+    en: "Price Range"
+  },
+  colors: {
+    fr: "Couleurs",
+    ar: "الألوان",
+    en: "Colors"
+  },
+  noProductsFound: {
+    fr: "Aucun produit trouvé",
+    ar: "لم يتم العثور على منتجات",
+    en: "No products found"
+  },
+  tryAdjusting: {
+    fr: "Essayez d'ajuster votre recherche ou vos filtres",
+    ar: "حاول تعديل البحث أو الفلاتر الخاصة بك",
+    en: "Try adjusting your search or filters"
+  },
+  fashion: {
+    fr: "Mode",
+    ar: "أزياء",
+    en: "Fashion"
+  },
+  beauty: {
+    fr: "Beauté",
+    ar: "جمال",
+    en: "Beauty"
+  },
+  electronics: {
+    fr: "Électronique",
+    ar: "إلكترونيات",
+    en: "Electronics"
+  },
+  home: {
+    fr: "Maison",
+    ar: "منزل",
+    en: "Home"
+  },
+  jewelry: {
+    fr: "Bijoux",
+    ar: "مجوهرات",
+    en: "Jewelry"
+  },
+  food: {
+    fr: "Alimentation",
+    ar: "طعام",
+    en: "Food"
+  },
+  sports: {
+    fr: "Sports",
+    ar: "رياضة",
+    en: "Sports"
+  },
+  allColors: {
+    fr: "Toutes les Couleurs",
+    ar: "جميع الألوان",
+    en: "All Colors"
+  },
+  black: {
+    fr: "Noir",
+    ar: "أسود",
+    en: "Black"
+  },
+  white: {
+    fr: "Blanc",
+    ar: "أبيض",
+    en: "White"
+  },
+  red: {
+    fr: "Rouge",
+    ar: "أحمر",
+    en: "Red"
+  },
+  blue: {
+    fr: "Bleu",
+    ar: "أزرق",
+    en: "Blue"
+  },
+  green: {
+    fr: "Vert",
+    ar: "أخضر",
+    en: "Green"
+  },
+  yellow: {
+    fr: "Jaune",
+    ar: "أصفر",
+    en: "Yellow"
+  },
+  brown: {
+    fr: "Brun",
+    ar: "بني",
+    en: "Brown"
+  }
+};
+
+// Translate categories and colors
+const getTranslatedCategories = (language: string) => {
+  return categories.map(category => {
+    if (category === "All Categories") {
+      return translations.allCategories[language as keyof typeof translations.allCategories];
+    }
+    const key = category.toLowerCase() as keyof typeof translations;
+    return translations[key]?.[language as keyof (typeof translations)[keyof typeof translations]] || category;
+  });
+};
+
+const getTranslatedColors = (language: string) => {
+  return colors.map(color => {
+    if (color === "All Colors") {
+      return translations.allColors[language as keyof typeof translations.allColors];
+    }
+    const key = color.toLowerCase() as keyof typeof translations;
+    return translations[key]?.[language as keyof (typeof translations)[keyof typeof translations]] || color;
+  });
+};
+
 const Index = () => {
+  const { language } = useContext(LanguageContext);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [selectedColor, setSelectedColor] = useState("All Colors");
+  const [selectedCategory, setSelectedCategory] = useState(translations.allCategories[language as keyof typeof translations.allCategories]);
+  const [selectedColor, setSelectedColor] = useState(translations.allColors[language as keyof typeof translations.allColors]);
   const [priceRange, setPriceRange] = useState([0, 6000]);
   const [products, setProducts] = useState<ProductProps[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<ProductProps[]>(mockProducts);
   const [sortBy, setSortBy] = useState("newest");
+  const [translatedCategories, setTranslatedCategories] = useState<string[]>(getTranslatedCategories(language));
+  const [translatedColors, setTranslatedColors] = useState<string[]>(getTranslatedColors(language));
+
+  // Update translations when language changes
+  useEffect(() => {
+    setTranslatedCategories(getTranslatedCategories(language));
+    setTranslatedColors(getTranslatedColors(language));
+    setSelectedCategory(translations.allCategories[language as keyof typeof translations.allCategories]);
+    setSelectedColor(translations.allColors[language as keyof typeof translations.allColors]);
+  }, [language]);
+
+  // Function to get translation
+  const getTranslation = (key: keyof typeof translations) => {
+    return translations[key][language as keyof (typeof translations)[keyof typeof translations]] || translations[key].en;
+  };
+
+  // Get sort by text
+  const getSortByText = () => {
+    if (sortBy === "newest") {
+      return getTranslation("newest");
+    } else if (sortBy === "price-low") {
+      return getTranslation("priceLowToHigh");
+    } else {
+      return getTranslation("priceHighToLow");
+    }
+  };
 
   // Apply filters when they change
   useEffect(() => {
@@ -180,10 +373,14 @@ const Index = () => {
       );
     }
     
-    // Category filter
-    if (selectedCategory !== "All Categories") {
+    // Category filter (handle translated category)
+    if (selectedCategory !== translations.allCategories[language as keyof typeof translations.allCategories]) {
+      // Find the original category from the translated one
+      const originalCategoryIndex = translatedCategories.findIndex(cat => cat === selectedCategory);
+      const originalCategory = categories[originalCategoryIndex];
+      
       result = result.filter(
-        (product) => product.category === selectedCategory
+        (product) => product.category === originalCategory
       );
     }
     
@@ -205,7 +402,7 @@ const Index = () => {
     }
     
     setFilteredProducts(result);
-  }, [searchTerm, selectedCategory, selectedColor, priceRange, sortBy, products]);
+  }, [searchTerm, selectedCategory, selectedColor, priceRange, sortBy, products, language, translatedCategories]);
 
   return (
     <div className="min-h-screen">
@@ -213,9 +410,9 @@ const Index = () => {
       
       <main className="container-custom pt-24 pb-16 animate-enter">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold mb-4 text-gradient">Discover Treasures</h1>
+          <h1 className="text-4xl font-bold mb-4 text-gradient">{getTranslation("discoverTreasures")}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Connect with talented artisans and sellers across Morocco. Find unique products and order directly through WhatsApp.
+            {getTranslation("connectWithArtisans")}
           </p>
         </div>
         
@@ -225,7 +422,7 @@ const Index = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder={getTranslation("searchProducts")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 h-12 rounded-full glass"
@@ -242,9 +439,9 @@ const Index = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                {categories.map((category) => (
+                {translatedCategories.map((category, index) => (
                   <DropdownMenuItem
-                    key={category}
+                    key={index}
                     onClick={() => setSelectedCategory(category)}
                     className={selectedCategory === category ? "bg-secondary" : ""}
                   >
@@ -258,22 +455,20 @@ const Index = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="h-12 rounded-full glass md:w-auto">
-                  <span className="hidden md:inline">Sort by: </span>
-                  {sortBy === "newest" && "Newest"}
-                  {sortBy === "price-low" && "Price: Low to High"}
-                  {sortBy === "price-high" && "Price: High to Low"}
+                  <span className="hidden md:inline">{getTranslation("sortBy")}</span>
+                  {getSortByText()}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setSortBy("newest")}>
-                  Newest
+                  {getTranslation("newest")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy("price-low")}>
-                  Price: Low to High
+                  {getTranslation("priceLowToHigh")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy("price-high")}>
-                  Price: High to Low
+                  {getTranslation("priceHighToLow")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -287,11 +482,11 @@ const Index = () => {
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
+                  <SheetTitle>{getTranslation("filters")}</SheetTitle>
                 </SheetHeader>
                 <div className="py-6 space-y-6">
                   <div>
-                    <h3 className="font-medium mb-3">Price Range</h3>
+                    <h3 className="font-medium mb-3">{getTranslation("priceRange")}</h3>
                     <Slider
                       defaultValue={[0, 6000]}
                       max={6000}
@@ -307,11 +502,11 @@ const Index = () => {
                   </div>
                   
                   <div>
-                    <h3 className="font-medium mb-3">Colors</h3>
+                    <h3 className="font-medium mb-3">{getTranslation("colors")}</h3>
                     <div className="grid grid-cols-2 gap-2">
-                      {colors.map((color) => (
+                      {translatedColors.map((color, index) => (
                         <Button
-                          key={color}
+                          key={index}
                           variant={selectedColor === color ? "default" : "outline"}
                           className="justify-start"
                           onClick={() => setSelectedColor(color)}
@@ -330,7 +525,7 @@ const Index = () => {
         {/* Desktop Filters */}
         <div className="hidden md:flex gap-8 mb-8">
           <div className="w-64">
-            <h3 className="font-medium mb-4">Price Range</h3>
+            <h3 className="font-medium mb-4">{getTranslation("priceRange")}</h3>
             <Slider
               defaultValue={[0, 6000]}
               max={6000}
@@ -346,11 +541,11 @@ const Index = () => {
           </div>
           
           <div>
-            <h3 className="font-medium mb-4">Colors</h3>
+            <h3 className="font-medium mb-4">{getTranslation("colors")}</h3>
             <div className="flex flex-wrap gap-2">
-              {colors.map((color) => (
+              {translatedColors.map((color, index) => (
                 <Button
-                  key={color}
+                  key={index}
                   variant={selectedColor === color ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedColor(color)}
@@ -367,8 +562,8 @@ const Index = () => {
         <div className="pb-8">
           {filteredProducts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-xl font-medium">No products found</p>
-              <p className="text-muted-foreground mt-2">Try adjusting your search or filters</p>
+              <p className="text-xl font-medium">{getTranslation("noProductsFound")}</p>
+              <p className="text-muted-foreground mt-2">{getTranslation("tryAdjusting")}</p>
             </div>
           ) : (
             <div className="product-grid">
