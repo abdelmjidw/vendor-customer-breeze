@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -11,11 +11,34 @@ import { toast } from "sonner";
 type Language = "fr" | "ar" | "en";
 
 const Settings = () => {
-  const [language, setLanguage] = useState<Language>("fr");
+  const [language, setLanguage] = useState<Language>(() => {
+    // Get stored language or default to French
+    return (localStorage.getItem("app_language") as Language) || "fr";
+  });
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Apply language settings on mount and when changed
+  useEffect(() => {
+    applyLanguageSettings(language);
+  }, [language]);
+
+  const applyLanguageSettings = (selectedLanguage: Language) => {
+    // Store language preference
+    localStorage.setItem("app_language", selectedLanguage);
+    
+    // Apply RTL for Arabic
+    if (selectedLanguage === "ar") {
+      document.documentElement.classList.add("rtl");
+      document.body.dir = "rtl";
+    } else {
+      document.documentElement.classList.remove("rtl");
+      document.body.dir = "ltr";
+    }
+  };
 
   const handleLanguageChange = (value: Language) => {
     setLanguage(value);
+    applyLanguageSettings(value);
     toast.success(`Language changed to ${getLanguageName(value)}`);
   };
 
@@ -44,12 +67,17 @@ const Settings = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="container-custom pt-24 pb-16 animate-enter">
+      <main className={`container-custom pt-24 pb-16 animate-enter ${language === 'ar' ? 'rtl' : ''}`}>
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold mb-4 text-gradient">Settings</h1>
+            <h1 className="text-4xl font-bold mb-4 text-gradient">
+              {language === 'ar' ? 'الإعدادات' : 
+               language === 'fr' ? 'Paramètres' : 'Settings'}
+            </h1>
             <p className="text-muted-foreground">
-              Customize your experience and preferences
+              {language === 'ar' ? 'تخصيص تجربتك وتفضيلاتك' :
+               language === 'fr' ? 'Personnalisez votre expérience et vos préférences' : 
+               'Customize your experience and preferences'}
             </p>
           </div>
           
@@ -61,9 +89,14 @@ const Settings = () => {
                   <Globe className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-medium">Language</h2>
+                  <h2 className="text-xl font-medium">
+                    {language === 'ar' ? 'اللغة' :
+                     language === 'fr' ? 'Langue' : 'Language'}
+                  </h2>
                   <p className="text-muted-foreground">
-                    Select your preferred language
+                    {language === 'ar' ? 'اختر لغتك المفضلة' :
+                     language === 'fr' ? 'Sélectionnez votre langue préférée' : 
+                     'Select your preferred language'}
                   </p>
                 </div>
               </div>
@@ -108,16 +141,25 @@ const Settings = () => {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-xl font-medium">Appearance</h2>
+                  <h2 className="text-xl font-medium">
+                    {language === 'ar' ? 'المظهر' :
+                     language === 'fr' ? 'Apparence' : 'Appearance'}
+                  </h2>
                   <p className="text-muted-foreground">
-                    Toggle between light and dark mode
+                    {language === 'ar' ? 'التبديل بين الوضع الفاتح والداكن' :
+                     language === 'fr' ? 'Basculer entre le mode clair et sombre' : 
+                     'Toggle between light and dark mode'}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center justify-between">
                 <Label htmlFor="dark-mode" className="flex items-center gap-2">
-                  {isDarkMode ? "Dark Mode" : "Light Mode"}
+                  {isDarkMode ? 
+                    (language === 'ar' ? 'الوضع الداكن' : 
+                     language === 'fr' ? 'Mode Sombre' : 'Dark Mode') : 
+                    (language === 'ar' ? 'الوضع الفاتح' : 
+                     language === 'fr' ? 'Mode Clair' : 'Light Mode')}
                 </Label>
                 <Switch
                   id="dark-mode"
@@ -129,12 +171,22 @@ const Settings = () => {
             
             {/* Account Settings (Placeholder for future implementation) */}
             <div className="glass rounded-xl p-6">
-              <h2 className="text-xl font-medium mb-4">Account Preferences</h2>
+              <h2 className="text-xl font-medium mb-4">
+                {language === 'ar' ? 'تفضيلات الحساب' :
+                 language === 'fr' ? 'Préférences du compte' : 'Account Preferences'}
+              </h2>
               <p className="text-muted-foreground mb-4">
-                Manage your account settings and preferences
+                {language === 'ar' ? 'إدارة إعدادات وتفضيلات حسابك' :
+                 language === 'fr' ? 'Gérez les paramètres et préférences de votre compte' : 
+                 'Manage your account settings and preferences'}
               </p>
-              <Button variant="outline" onClick={() => toast.info("This feature is coming soon")}>
-                Manage Account
+              <Button variant="outline" onClick={() => toast.info(
+                language === 'ar' ? 'هذه الميزة قادمة قريبا' :
+                language === 'fr' ? 'Cette fonctionnalité sera bientôt disponible' : 
+                'This feature is coming soon'
+              )}>
+                {language === 'ar' ? 'إدارة الحساب' :
+                 language === 'fr' ? 'Gérer le compte' : 'Manage Account'}
               </Button>
             </div>
           </div>
