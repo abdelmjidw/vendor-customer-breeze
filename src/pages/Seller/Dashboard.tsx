@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ import {
 import { ProductProps } from "@/components/ProductCard";
 import { toast } from "sonner";
 import { useWhatsAppAuth } from "@/hooks/useWhatsAppAuth";
+import { LanguageContext, Language } from "@/App";
 
 // Mock data for demonstration
 const mockSellerProducts: ProductProps[] = [
@@ -68,6 +70,7 @@ const mockSellerProducts: ProductProps[] = [
 ];
 
 const SellerDashboard = () => {
+  const { language } = useContext(LanguageContext);
   const { 
     isAuthenticated, 
     isLoading, 
@@ -105,24 +108,222 @@ const SellerDashboard = () => {
 
   const handleDeleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
-    toast.success("Product deleted successfully");
+    toast.success(getTranslatedText("productDeletedSuccess"));
   };
 
   const filteredProducts = products.filter((product) =>
     product.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Translation function
+  const getTranslatedText = (key: string) => {
+    const translations: Record<string, Record<string, string>> = {
+      sellerLogin: {
+        fr: "Connexion Vendeur",
+        ar: "تسجيل دخول البائع",
+        en: "Seller Login"
+      },
+      connectWhatsApp: {
+        fr: "Connectez-vous avec votre compte WhatsApp",
+        ar: "تواصل مع حساب الواتساب الخاص بك",
+        en: "Connect with your WhatsApp account"
+      },
+      whatsAppNumber: {
+        fr: "Numéro WhatsApp",
+        ar: "رقم الواتساب",
+        en: "WhatsApp Number"
+      },
+      sendCode: {
+        fr: "Envoyer le Code",
+        ar: "إرسال الرمز",
+        en: "Send Code"
+      },
+      sendingCode: {
+        fr: "Envoi du code...",
+        ar: "جاري إرسال الرمز...",
+        en: "Sending code..."
+      },
+      verificationCode: {
+        fr: "Code de Vérification",
+        ar: "رمز التحقق",
+        en: "Verification Code"
+      },
+      enterCode: {
+        fr: "Entrez le code à 6 chiffres",
+        ar: "أدخل الرمز المكون من 6 أرقام",
+        en: "Enter the 6-digit code"
+      },
+      codeInfo: {
+        fr: "Entrez le code envoyé à +",
+        ar: "أدخل الرمز المرسل إلى +",
+        en: "Enter the code sent to +"
+      },
+      changeNumber: {
+        fr: "Changer de numéro",
+        ar: "تغيير الرقم",
+        en: "Change number"
+      },
+      resendCode: {
+        fr: "Renvoyer le code",
+        ar: "إعادة إرسال الرمز",
+        en: "Resend code"
+      },
+      verifying: {
+        fr: "Vérification...",
+        ar: "جاري التحقق...",
+        en: "Verifying..."
+      },
+      login: {
+        fr: "Se Connecter",
+        ar: "تسجيل الدخول",
+        en: "Login"
+      },
+      sellerDashboard: {
+        fr: "Tableau de Bord Vendeur",
+        ar: "لوحة تحكم البائع",
+        en: "Seller Dashboard"
+      },
+      manageProducts: {
+        fr: "Gérez vos produits et votre boutique",
+        ar: "إدارة منتجاتك ومتجرك",
+        en: "Manage your products and store"
+      },
+      logout: {
+        fr: "Déconnexion",
+        ar: "تسجيل الخروج",
+        en: "Logout"
+      },
+      addProduct: {
+        fr: "Ajouter un Produit",
+        ar: "إضافة منتج",
+        en: "Add Product"
+      },
+      products: {
+        fr: "Produits",
+        ar: "المنتجات",
+        en: "Products"
+      },
+      profile: {
+        fr: "Profil",
+        ar: "الملف الشخصي",
+        en: "Profile"
+      },
+      searchProducts: {
+        fr: "Rechercher des produits...",
+        ar: "البحث عن المنتجات...",
+        en: "Search products..."
+      },
+      noProductsFound: {
+        fr: "Aucun produit trouvé",
+        ar: "لم يتم العثور على منتجات",
+        en: "No products found"
+      },
+      tryDifferentSearch: {
+        fr: "Essayez un terme de recherche différent",
+        ar: "جرب مصطلح بحث مختلف",
+        en: "Try a different search term"
+      },
+      startAddingProducts: {
+        fr: "Commencez à ajouter des produits à votre boutique",
+        ar: "ابدأ بإضافة منتجات إلى متجرك",
+        en: "Start adding products to your store"
+      },
+      addFirstProduct: {
+        fr: "Ajoutez Votre Premier Produit",
+        ar: "أضف منتجك الأول",
+        en: "Add Your First Product"
+      },
+      product: {
+        fr: "Produit",
+        ar: "المنتج",
+        en: "Product"
+      },
+      category: {
+        fr: "Catégorie",
+        ar: "الفئة",
+        en: "Category"
+      },
+      price: {
+        fr: "Prix",
+        ar: "السعر",
+        en: "Price"
+      },
+      actions: {
+        fr: "Actions",
+        ar: "الإجراءات",
+        en: "Actions"
+      },
+      storeInfo: {
+        fr: "Informations sur la Boutique",
+        ar: "معلومات المتجر",
+        en: "Store Information"
+      },
+      storeName: {
+        fr: "Nom de la Boutique",
+        ar: "اسم المتجر",
+        en: "Store Name"
+      },
+      location: {
+        fr: "Emplacement",
+        ar: "الموقع",
+        en: "Location"
+      },
+      saveChanges: {
+        fr: "Enregistrer les Modifications",
+        ar: "حفظ التغييرات",
+        en: "Save Changes"
+      },
+      deleteProduct: {
+        fr: "Supprimer le Produit",
+        ar: "حذف المنتج",
+        en: "Delete Product"
+      },
+      deleteConfirmation: {
+        fr: "Êtes-vous sûr de vouloir supprimer ce produit ? Cette action ne peut pas être annulée.",
+        ar: "هل أنت متأكد من أنك تريد حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.",
+        en: "Are you sure you want to delete this product? This action cannot be undone."
+      },
+      cancel: {
+        fr: "Annuler",
+        ar: "إلغاء",
+        en: "Cancel"
+      },
+      delete: {
+        fr: "Supprimer",
+        ar: "حذف",
+        en: "Delete"
+      },
+      productDeletedSuccess: {
+        fr: "Produit supprimé avec succès",
+        ar: "تم حذف المنتج بنجاح",
+        en: "Product deleted successfully"
+      },
+      profileUpdated: {
+        fr: "Profil mis à jour",
+        ar: "تم تحديث الملف الشخصي",
+        en: "Profile updated"
+      },
+      newCodeSent: {
+        fr: "Nouveau code envoyé",
+        ar: "تم إرسال رمز جديد",
+        en: "New code sent"
+      }
+    };
+
+    return translations[key]?.[language] || translations[key]?.en || key;
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen">
         <Navbar />
         
-        <main className="container-custom pt-24 pb-16 animate-enter">
+        <main className={`container-custom pt-24 pb-16 animate-enter ${language === 'ar' ? 'rtl' : ''}`}>
           <div className="max-w-md mx-auto glass rounded-2xl p-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2 text-gradient">Seller Login</h1>
+              <h1 className="text-3xl font-bold mb-2 text-gradient">{getTranslatedText("sellerLogin")}</h1>
               <p className="text-muted-foreground">
-                Connect with your WhatsApp account
+                {getTranslatedText("connectWhatsApp")}
               </p>
             </div>
             
@@ -130,7 +331,7 @@ const SellerDashboard = () => {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="phone" className="block text-sm font-medium">
-                    WhatsApp Number
+                    {getTranslatedText("whatsAppNumber")}
                   </label>
                   <div className="relative">
                     <Input
@@ -147,7 +348,9 @@ const SellerDashboard = () => {
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    We'll send you a verification code on WhatsApp
+                    {language === 'ar' ? 'سنرسل لك رمز تحقق على واتساب' :
+                     language === 'fr' ? 'Nous vous enverrons un code de vérification sur WhatsApp' :
+                     "We'll send you a verification code on WhatsApp"}
                   </p>
                 </div>
                 
@@ -156,20 +359,20 @@ const SellerDashboard = () => {
                   className="w-full btn-whatsapp"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Sending code..." : "Send Code"}
+                  {isLoading ? getTranslatedText("sendingCode") : getTranslatedText("sendCode")}
                 </Button>
               </form>
             ) : (
               <form onSubmit={handleVerify} className="space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="code" className="block text-sm font-medium">
-                    Verification Code
+                    {getTranslatedText("verificationCode")}
                   </label>
                   <div className="relative">
                     <Input
                       id="code"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter the 6-digit code"
+                      placeholder={getTranslatedText("enterCode")}
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
                       className="pr-10"
@@ -188,7 +391,7 @@ const SellerDashboard = () => {
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Enter the code sent to +{phoneNumber}
+                    {getTranslatedText("codeInfo")}{phoneNumber}
                   </p>
                 </div>
                 
@@ -198,7 +401,7 @@ const SellerDashboard = () => {
                     className="text-sm text-muted-foreground hover:text-foreground"
                     onClick={() => setPhoneNumber("")}
                   >
-                    Change number
+                    {getTranslatedText("changeNumber")}
                   </button>
                   <button
                     type="button"
@@ -206,10 +409,10 @@ const SellerDashboard = () => {
                     onClick={async () => {
                       await handleSendCode();
                       setVerificationCode("");
-                      toast.info("New code sent");
+                      toast.info(getTranslatedText("newCodeSent"));
                     }}
                   >
-                    Resend code
+                    {getTranslatedText("resendCode")}
                   </button>
                 </div>
                 
@@ -218,7 +421,7 @@ const SellerDashboard = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Verifying..." : "Login"}
+                  {isLoading ? getTranslatedText("verifying") : getTranslatedText("login")}
                 </Button>
               </form>
             )}
@@ -229,15 +432,15 @@ const SellerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${language === 'ar' ? 'rtl' : ''}`}>
       <Navbar />
       
       <main className="container-custom pt-24 pb-16 animate-enter">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gradient">Seller Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gradient">{getTranslatedText("sellerDashboard")}</h1>
             <p className="text-muted-foreground">
-              Manage your products and store
+              {getTranslatedText("manageProducts")}
             </p>
           </div>
           
@@ -246,12 +449,12 @@ const SellerDashboard = () => {
               variant="outline"
               onClick={handleLogout}
             >
-              Logout
+              {getTranslatedText("logout")}
             </Button>
             <Button asChild>
               <Link to="/seller/add-product">
                 <Plus className="h-5 w-5 mr-2" />
-                Add Product
+                {getTranslatedText("addProduct")}
               </Link>
             </Button>
           </div>
@@ -261,10 +464,10 @@ const SellerDashboard = () => {
           <TabsList>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
-              <span>Products</span>
+              <span>{getTranslatedText("products")}</span>
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center gap-2">
-              Profile
+              {getTranslatedText("profile")}
             </TabsTrigger>
           </TabsList>
           
@@ -274,7 +477,7 @@ const SellerDashboard = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={getTranslatedText("searchProducts")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -283,7 +486,7 @@ const SellerDashboard = () => {
               <Button asChild>
                 <Link to="/seller/add-product">
                   <Plus className="h-5 w-5 mr-2" />
-                  Add Product
+                  {getTranslatedText("addProduct")}
                 </Link>
               </Button>
             </div>
@@ -293,15 +496,15 @@ const SellerDashboard = () => {
                 <div className="mx-auto w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-4">
                   <AlertCircle className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-medium mb-2">No products found</h3>
+                <h3 className="text-lg font-medium mb-2">{getTranslatedText("noProductsFound")}</h3>
                 <p className="text-muted-foreground mb-6">
-                  {searchTerm ? "Try a different search term" : "Start adding products to your store"}
+                  {searchTerm ? getTranslatedText("tryDifferentSearch") : getTranslatedText("startAddingProducts")}
                 </p>
                 {!searchTerm && (
                   <Button asChild>
                     <Link to="/seller/add-product">
                       <Plus className="h-5 w-5 mr-2" />
-                      Add Your First Product
+                      {getTranslatedText("addFirstProduct")}
                     </Link>
                   </Button>
                 )}
@@ -311,10 +514,10 @@ const SellerDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead className="hidden md:table-cell">Category</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{getTranslatedText("product")}</TableHead>
+                      <TableHead className="hidden md:table-cell">{getTranslatedText("category")}</TableHead>
+                      <TableHead className="text-right">{getTranslatedText("price")}</TableHead>
+                      <TableHead className="text-right">{getTranslatedText("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -366,9 +569,9 @@ const SellerDashboard = () => {
                               </DialogTrigger>
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Delete Product</DialogTitle>
+                                  <DialogTitle>{getTranslatedText("deleteProduct")}</DialogTitle>
                                   <DialogDescription>
-                                    Are you sure you want to delete this product? This action cannot be undone.
+                                    {getTranslatedText("deleteConfirmation")}
                                   </DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter>
@@ -376,13 +579,13 @@ const SellerDashboard = () => {
                                     variant="ghost"
                                     onClick={() => {}}
                                   >
-                                    Cancel
+                                    {getTranslatedText("cancel")}
                                   </Button>
                                   <Button
                                     variant="destructive"
                                     onClick={() => handleDeleteProduct(product.id)}
                                   >
-                                    Delete
+                                    {getTranslatedText("delete")}
                                   </Button>
                                 </DialogFooter>
                               </DialogContent>
@@ -400,11 +603,11 @@ const SellerDashboard = () => {
           <TabsContent value="profile">
             <div className="glass rounded-xl p-6 space-y-6">
               <div>
-                <h2 className="text-xl font-medium mb-4">Store Information</h2>
+                <h2 className="text-xl font-medium mb-4">{getTranslatedText("storeInfo")}</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label htmlFor="store-name" className="block text-sm font-medium">
-                      Store Name
+                      {getTranslatedText("storeName")}
                     </label>
                     <Input
                       id="store-name"
@@ -413,7 +616,7 @@ const SellerDashboard = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="location" className="block text-sm font-medium">
-                      Location
+                      {getTranslatedText("location")}
                     </label>
                     <Input
                       id="location"
@@ -422,7 +625,7 @@ const SellerDashboard = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="whatsapp" className="block text-sm font-medium">
-                      WhatsApp Number
+                      {getTranslatedText("whatsAppNumber")}
                     </label>
                     <div className="relative">
                       <Input
@@ -439,8 +642,8 @@ const SellerDashboard = () => {
               </div>
               
               <div className="pt-4 border-t">
-                <Button onClick={() => toast.success("Profile updated")}>
-                  Save Changes
+                <Button onClick={() => toast.success(getTranslatedText("profileUpdated"))}>
+                  {getTranslatedText("saveChanges")}
                 </Button>
               </div>
             </div>
