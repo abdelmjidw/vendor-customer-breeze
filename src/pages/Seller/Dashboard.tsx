@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -14,7 +13,8 @@ import {
   AlertCircle, 
   Eye,
   EyeOff,
-  LogIn
+  LogIn,
+  Phone
 } from "lucide-react";
 import {
   Table,
@@ -750,6 +750,23 @@ const SellerDashboard = () => {
                         </span>
                       </div>
                     )}
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="block text-sm font-medium">
+                      {language === 'fr' ? 'Numéro de téléphone' : 
+                       language === 'ar' ? 'رقم الهاتف' : 
+                       'Phone Number'}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="phone"
+                        defaultValue="212522000000"
+                        className="pl-8"
+                      />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        +
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -103,7 +103,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
             <p className="text-xs text-muted-foreground">{product.location}</p>
           </div>
           <Button 
-            className="mt-4 w-full btn-whatsapp"
+            className="mt-4 w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
             onClick={handleWhatsAppOrder}
           >
             {getWhatsAppButtonText()}

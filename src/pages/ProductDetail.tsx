@@ -1,3 +1,4 @@
+
 import { useState, useRef, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Heart, MapPin, ArrowLeft, ChevronLeft, ChevronRight, Share2, ShoppingBag } from "lucide-react";
@@ -291,7 +292,7 @@ const ProductDetail = () => {
             
             <div className="mt-8">
               <Button 
-                className="w-full h-12 btn-whatsapp"
+                className="w-full h-12 bg-[#25D366] hover:bg-[#128C7E] text-white"
                 onClick={handleWhatsAppOrder}
               >
                 <ShoppingBag className="h-5 w-5 mr-2" />
