@@ -14,7 +14,10 @@ export interface ProductProps {
   currency: string;
   images: string[];
   category: string;
+  subcategory?: string;
   location: string;
+  size?: string[];
+  colors?: string[];
   seller: {
     id: string;
     name: string;
@@ -93,7 +96,10 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
           <div className="flex items-start justify-between">
             <div>
               <h3 className="font-medium line-clamp-1">{product.title}</h3>
-              <p className="text-sm text-muted-foreground">{product.category}</p>
+              <p className="text-sm text-muted-foreground">
+                {product.category}
+                {product.subcategory && ` › ${product.subcategory}`}
+              </p>
             </div>
             <p className="font-semibold">
               {product.currency} {product.price.toLocaleString()}
@@ -101,6 +107,28 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
           </div>
           <div className="mt-3">
             <p className="text-xs text-muted-foreground">{product.location}</p>
+            {(product.size?.length > 0 || product.colors?.length > 0) && (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {product.size?.map((size, index) => (
+                  <span key={`size-${index}`} className="text-xs px-2 py-1 bg-muted rounded-full">
+                    {size}
+                  </span>
+                ))}
+                {product.colors?.map((color, index) => (
+                  <span 
+                    key={`color-${index}`} 
+                    className="text-xs px-2 py-1 rounded-full flex items-center gap-1"
+                    style={{ backgroundColor: color === "white" ? "#f8fafc" : color }}
+                  >
+                    <span 
+                      className="w-2 h-2 rounded-full" 
+                      style={{ backgroundColor: color }}
+                    />
+                    {color}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <Button 
             className="mt-4 w-full bg-[#25D366] hover:bg-[#128C7E] text-white"

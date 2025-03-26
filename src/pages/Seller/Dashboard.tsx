@@ -14,7 +14,10 @@ import {
   Eye,
   EyeOff,
   LogIn,
-  Phone
+  Phone,
+  Key,
+  Copy,
+  RefreshCw
 } from "lucide-react";
 import {
   Table,
@@ -108,6 +111,7 @@ const SellerDashboard = () => {
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -121,6 +125,12 @@ const SellerDashboard = () => {
         console.error("Failed to parse Google auth:", error);
         localStorage.removeItem("google_auth");
       }
+    }
+
+    // Load API key from localStorage if it exists
+    const savedApiKey = localStorage.getItem("seller_api_key");
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
     }
 
     // Simulating loading products after authentication
@@ -148,6 +158,25 @@ const SellerDashboard = () => {
   const handleDeleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
     toast.success(getTranslatedText("productDeletedSuccess"));
+  };
+
+  const generateApiKey = () => {
+    // Generate a random API key
+    const newApiKey = Array(32)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * 16).toString(16))
+      .join("");
+    
+    setApiKey(newApiKey);
+    localStorage.setItem("seller_api_key", newApiKey);
+    toast.success(getTranslatedText("apiKeyGenerated"));
+  };
+
+  const copyApiKey = () => {
+    if (apiKey) {
+      navigator.clipboard.writeText(apiKey);
+      toast.success(getTranslatedText("apiKeyCopied"));
+    }
   };
 
   const filteredProducts = products.filter((product) =>
@@ -243,7 +272,7 @@ const SellerDashboard = () => {
         en: "Products"
       },
       profile: {
-        fr: "Profil",
+        fr: "الملف الشخصي",
         ar: "الملف الشخصي",
         en: "Profile"
       },
@@ -361,7 +390,47 @@ const SellerDashboard = () => {
         fr: "E-mail",
         ar: "البريد الإلكتروني",
         en: "Email"
-      }
+      },
+      apiKeyManagement: {
+        fr: "Gestion des clés API",
+        ar: "إدارة مفاتيح API",
+        en: "API Key Management"
+      },
+      generateApiKey: {
+        fr: "Générer une clé API",
+        ar: "إنشاء مفتاح API",
+        en: "Generate API Key"
+      },
+      regenerateApiKey: {
+        fr: "Régénérer la clé API",
+        ar: "إعادة إنشاء مفتاح API",
+        en: "Regenerate API Key"
+      },
+      apiKeyGenerated: {
+        fr: "Clé API générée avec succès",
+        ar: "تم إنشاء مفتاح API بنجاح",
+        en: "API Key generated successfully"
+      },
+      apiKeyCopied: {
+        fr: "Clé API copiée dans le presse-papiers",
+        ar: "تم نسخ مفتاح API إلى الحافظة",
+        en: "API Key copied to clipboard"
+      },
+      yourApiKey: {
+        fr: "Votre clé API",
+        ar: "مفتاح API الخاص بك",
+        en: "Your API Key"
+      },
+      apiKeyDescription: {
+        fr: "Utilisez cette clé API pour télécharger des produits via l'API",
+        ar: "استخدم مفتاح API هذا لتحميل المنتجات عبر API",
+        en: "Use this API key to upload products via the API"
+      },
+      copy: {
+        fr: "Copier",
+        ar: "نسخ",
+        en: "Copy"
+      },
     };
 
     return translations[key]?.[language] || translations[key]?.en || key;
@@ -522,7 +591,7 @@ const SellerDashboard = () => {
                   onClick={handleGoogleSignIn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
-                    <path fill="#FFC107" d="M43.6,20H24v8h11.3c-1.1,5.2-5.5,8-11.3,8c-6.6,0-12-5.4-12-12s5.4-12,12-12c3,0,5.8,1.1,7.9,3l6-6 C33.7,5.9,29,4,24,4C13,4,4,13,4,24s9,20,20,20s19-9,19-20C43,22.7,42.9,21.3,43.6,20z"/>
+                    <path fill="#FFC107" d="M43.6,20H24v8h11.3c-1.1,5.2-5.5,8-11.3,8c-6.6,0-12-5.4-12-12s5.4-12,12-12c3,0,5.8,1.1,7.9,3l6-6C33.7,5.9,29,4,24,4 C16.8,4,10.4,8.3,6.3,14.7z"/>
                     <path fill="#FF3D00" d="M6.3,14.7l7,5.4c1.8-5.1,6.7-8.1,12.8-8.1c3,0,5.8,1.1,7.9,3l6-6C33.7,5.9,29,4,24,4 C16.8,4,10.4,8.3,6.3,14.7z"/>
                     <path fill="#4CAF50" d="M24,44c4.9,0,9.5-1.8,12.9-4.9l-6.6-5.2c-1.8,1.2-4.3,2.1-6.3,2.1c-5.8,0-10.2-3.9-11.3-9.1l-6.8,5.2 C9.1,39.3,16.1,44,24,44z"/>
                     <path fill="#1976D2" d="M43.6,20H24v8h11.3c-0.5,2.6-2.1,4.8-4.2,6.3l0,0l6.6,5.2c-0.4,0.3,6.7-4.9,6.7-15.5 C43,22.7,42.9,21.3,43.6,20z"/>
@@ -574,6 +643,10 @@ const SellerDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               {getTranslatedText("profile")}
+            </TabsTrigger>
+            <TabsTrigger value="api" className="flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              <span>{getTranslatedText("apiKeyManagement")}</span>
             </TabsTrigger>
           </TabsList>
           
@@ -761,27 +834,4 @@ const SellerDashboard = () => {
                       <Input
                         id="phone"
                         defaultValue="212522000000"
-                        className="pl-8"
-                      />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        +
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-4 border-t">
-                <Button onClick={() => toast.success(getTranslatedText("profileUpdated"))}>
-                  {getTranslatedText("saveChanges")}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
-  );
-};
-
-export default SellerDashboard;
+                        className="pl
