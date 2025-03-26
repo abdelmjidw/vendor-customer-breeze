@@ -13,7 +13,8 @@ import {
   Trash2, 
   AlertCircle, 
   Eye,
-  EyeOff
+  EyeOff,
+  LogIn
 } from "lucide-react";
 import {
   Table,
@@ -36,6 +37,7 @@ import { ProductProps } from "@/components/ProductCard";
 import { toast } from "sonner";
 import { useWhatsAppAuth } from "@/hooks/useWhatsAppAuth";
 import { LanguageContext, Language } from "@/App";
+import { Separator } from "@/components/ui/separator";
 
 // Mock data for demonstration
 const mockSellerProducts: ProductProps[] = [
@@ -69,6 +71,24 @@ const mockSellerProducts: ProductProps[] = [
   },
 ];
 
+// Mock function for Google authentication
+const handleGoogleSignIn = () => {
+  // In a real application, this would use Firebase, Auth0, or another auth provider
+  // For demonstration, we'll simulate a successful login
+  localStorage.setItem("google_auth", JSON.stringify({
+    isAuthenticated: true,
+    user: {
+      id: "google_user_1",
+      name: "Google User",
+      email: "user@gmail.com",
+      picture: "https://ui-avatars.com/api/?name=Google+User&background=random"
+    }
+  }));
+  
+  // Reload the page to reflect authentication state
+  window.location.reload();
+};
+
 const SellerDashboard = () => {
   const { language } = useContext(LanguageContext);
   const { 
@@ -87,14 +107,27 @@ const SellerDashboard = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if authenticated with Google
+    const googleAuth = localStorage.getItem("google_auth");
+    if (googleAuth) {
+      try {
+        const { isAuthenticated } = JSON.parse(googleAuth);
+        setIsGoogleAuthenticated(isAuthenticated);
+      } catch (error) {
+        console.error("Failed to parse Google auth:", error);
+        localStorage.removeItem("google_auth");
+      }
+    }
+
     // Simulating loading products after authentication
-    if (isAuthenticated) {
+    if (isAuthenticated || isGoogleAuthenticated) {
       setProducts(mockSellerProducts);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isGoogleAuthenticated]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +137,12 @@ const SellerDashboard = () => {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleVerifyCode();
+  };
+
+  const handleGoogleLogout = () => {
+    localStorage.removeItem("google_auth");
+    setIsGoogleAuthenticated(false);
+    window.location.reload();
   };
 
   const handleDeleteProduct = (id: string) => {
@@ -307,13 +346,28 @@ const SellerDashboard = () => {
         fr: "Nouveau code envoyé",
         ar: "تم إرسال رمز جديد",
         en: "New code sent"
+      },
+      orContinueWith: {
+        fr: "Ou continuer avec",
+        ar: "أو تابع مع",
+        en: "Or continue with"
+      },
+      continueWithGoogle: {
+        fr: "Continuer avec Google",
+        ar: "تابع مع جوجل",
+        en: "Continue with Google"
+      },
+      email: {
+        fr: "E-mail",
+        ar: "البريد الإلكتروني",
+        en: "Email"
       }
     };
 
     return translations[key]?.[language] || translations[key]?.en || key;
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isGoogleAuthenticated) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -360,6 +414,32 @@ const SellerDashboard = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? getTranslatedText("sendingCode") : getTranslatedText("sendCode")}
+                </Button>
+                
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"></span>
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      {getTranslatedText("orContinueWith")}
+                    </span>
+                  </div>
+                </div>
+                
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={handleGoogleSignIn}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#FFC107" d="M43.6,20H24v8h11.3c-1.1,5.2-5.5,8-11.3,8c-6.6,0-12-5.4-12-12s5.4-12,12-12c3,0,5.8,1.1,7.9,3l6-6 C33.7,5.9,29,4,24,4C13,4,4,13,4,24s9,20,20,20s19-9,19-20C43,22.7,42.9,21.3,43.6,20z"/>
+                    <path fill="#FF3D00" d="M6.3,14.7l7,5.4c1.8-5.1,6.7-8.1,12.8-8.1c3,0,5.8,1.1,7.9,3l6-6C33.7,5.9,29,4,24,4 C16.8,4,10.4,8.3,6.3,14.7z"/>
+                    <path fill="#4CAF50" d="M24,44c4.9,0,9.5-1.8,12.9-4.9l-6.6-5.2c-1.8,1.2-4.3,2.1-6.3,2.1c-5.8,0-10.2-3.9-11.3-9.1l-6.8,5.2 C9.1,39.3,16.1,44,24,44z"/>
+                    <path fill="#1976D2" d="M43.6,20H24v8h11.3c-0.5,2.6-2.1,4.8-4.2,6.3l0,0l6.6,5.2c-0.4,0.3,6.7-4.9,6.7-15.5 C43,22.7,42.9,21.3,43.6,20z"/>
+                  </svg>
+                  {getTranslatedText("continueWithGoogle")}
                 </Button>
               </form>
             ) : (
@@ -423,6 +503,32 @@ const SellerDashboard = () => {
                 >
                   {isLoading ? getTranslatedText("verifying") : getTranslatedText("login")}
                 </Button>
+                
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"></span>
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      {getTranslatedText("orContinueWith")}
+                    </span>
+                  </div>
+                </div>
+                
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={handleGoogleSignIn}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#FFC107" d="M43.6,20H24v8h11.3c-1.1,5.2-5.5,8-11.3,8c-6.6,0-12-5.4-12-12s5.4-12,12-12c3,0,5.8,1.1,7.9,3l6-6 C33.7,5.9,29,4,24,4C13,4,4,13,4,24s9,20,20,20s19-9,19-20C43,22.7,42.9,21.3,43.6,20z"/>
+                    <path fill="#FF3D00" d="M6.3,14.7l7,5.4c1.8-5.1,6.7-8.1,12.8-8.1c3,0,5.8,1.1,7.9,3l6-6C33.7,5.9,29,4,24,4 C16.8,4,10.4,8.3,6.3,14.7z"/>
+                    <path fill="#4CAF50" d="M24,44c4.9,0,9.5-1.8,12.9-4.9l-6.6-5.2c-1.8,1.2-4.3,2.1-6.3,2.1c-5.8,0-10.2-3.9-11.3-9.1l-6.8,5.2 C9.1,39.3,16.1,44,24,44z"/>
+                    <path fill="#1976D2" d="M43.6,20H24v8h11.3c-0.5,2.6-2.1,4.8-4.2,6.3l0,0l6.6,5.2c-0.4,0.3,6.7-4.9,6.7-15.5 C43,22.7,42.9,21.3,43.6,20z"/>
+                  </svg>
+                  {getTranslatedText("continueWithGoogle")}
+                </Button>
               </form>
             )}
           </div>
@@ -447,7 +553,7 @@ const SellerDashboard = () => {
           <div className="flex gap-3">
             <Button 
               variant="outline"
-              onClick={handleLogout}
+              onClick={isGoogleAuthenticated ? handleGoogleLogout : handleLogout}
             >
               {getTranslatedText("logout")}
             </Button>
@@ -624,19 +730,26 @@ const SellerDashboard = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="whatsapp" className="block text-sm font-medium">
-                      {getTranslatedText("whatsAppNumber")}
+                    <label htmlFor="contact" className="block text-sm font-medium">
+                      {isGoogleAuthenticated ? getTranslatedText("email") : getTranslatedText("whatsAppNumber")}
                     </label>
-                    <div className="relative">
+                    {isGoogleAuthenticated ? (
                       <Input
-                        id="whatsapp"
-                        defaultValue={phoneNumber}
-                        className="pl-8"
+                        id="contact"
+                        defaultValue="user@gmail.com"
                       />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        +
-                      </span>
-                    </div>
+                    ) : (
+                      <div className="relative">
+                        <Input
+                          id="contact"
+                          defaultValue={phoneNumber}
+                          className="pl-8"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          +
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
