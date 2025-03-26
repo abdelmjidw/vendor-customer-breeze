@@ -25,6 +25,11 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ArrowLeft, Plus, X, Upload, Image } from "lucide-react";
 import { toast } from "sonner";
 
@@ -60,6 +65,18 @@ const AddProduct = () => {
   const [customSubcategories, setCustomSubcategories] = useState<Record<string, string[]>>({});
   const [newCategory, setNewCategory] = useState<string>("");
   const [newSubcategory, setNewSubcategory] = useState<string>("");
+  
+  // States for available options
+  const [sizes, setSizes] = useState<string[]>(["Small", "Medium", "Large"]);
+  const [colors, setColors] = useState<{name: string, hex: string}[]>([
+    {name: "Red", hex: "#f44336"},
+    {name: "Blue", hex: "#2196f3"},
+    {name: "Green", hex: "#4caf50"}
+  ]);
+  const [newSize, setNewSize] = useState<string>("");
+  const [newColor, setNewColor] = useState<{name: string, hex: string}>({name: "", hex: "#000000"});
+  const [isOpenSizeDialog, setIsOpenSizeDialog] = useState(false);
+  const [isOpenColorDialog, setIsOpenColorDialog] = useState(false);
   
   // Simulated image upload function
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,6 +180,50 @@ const AddProduct = () => {
     toast.success("Subcategory added successfully");
   };
   
+  // Size management
+  const handleAddSize = () => {
+    if (!newSize.trim()) {
+      toast.error("Please enter a size");
+      return;
+    }
+    
+    if (sizes.includes(newSize)) {
+      toast.error("This size already exists");
+      return;
+    }
+    
+    setSizes([...sizes, newSize]);
+    setNewSize("");
+    setIsOpenSizeDialog(false);
+    toast.success("Size added successfully");
+  };
+  
+  const handleRemoveSize = (sizeToRemove: string) => {
+    setSizes(sizes.filter(size => size !== sizeToRemove));
+  };
+  
+  // Color management
+  const handleAddColor = () => {
+    if (!newColor.name.trim()) {
+      toast.error("Please enter a color name");
+      return;
+    }
+    
+    if (colors.some(color => color.name === newColor.name)) {
+      toast.error("This color already exists");
+      return;
+    }
+    
+    setColors([...colors, newColor]);
+    setNewColor({name: "", hex: "#000000"});
+    setIsOpenColorDialog(false);
+    toast.success("Color added successfully");
+  };
+  
+  const handleRemoveColor = (colorName: string) => {
+    setColors(colors.filter(color => color.name !== colorName));
+  };
+  
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     
@@ -186,6 +247,13 @@ const AddProduct = () => {
     return [...defaultSubcats, ...customSubcats];
   };
   
+  // Handle API-based product creation
+  const handleApiImport = () => {
+    // This would typically fetch product data from an external API
+    // For now, we'll just simulate it with a success message
+    toast.success("Products imported from API successfully");
+  };
+  
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -207,6 +275,17 @@ const AddProduct = () => {
             <p className="text-muted-foreground">
               Fill in the details to list your product
             </p>
+          </div>
+          
+          <div className="flex justify-end mb-4">
+            <Button 
+              onClick={handleApiImport}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Import from API
+            </Button>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -547,94 +626,145 @@ const AddProduct = () => {
                 <h2 className="text-xl font-medium mb-4">Available Options</h2>
                 
                 <div className="space-y-6">
+                  {/* Sizes */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <Label>Available Sizes</Label>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        className="h-8"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Size
-                      </Button>
+                      <Dialog open={isOpenSizeDialog} onOpenChange={setIsOpenSizeDialog}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            className="h-8"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Size
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Add New Size</DialogTitle>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="new-size">Size Name</Label>
+                              <Input 
+                                id="new-size" 
+                                placeholder="E.g., XL, XXL, 42, 44..."
+                                value={newSize}
+                                onChange={(e) => setNewSize(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              type="button" 
+                              onClick={handleAddSize}
+                            >
+                              Add Size
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <div className="flex items-center border rounded-full px-3 py-1">
-                        <span className="text-sm">Small</span>
-                        <button
-                          type="button"
-                          className="ml-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <div className="flex items-center border rounded-full px-3 py-1">
-                        <span className="text-sm">Medium</span>
-                        <button
-                          type="button"
-                          className="ml-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <div className="flex items-center border rounded-full px-3 py-1">
-                        <span className="text-sm">Large</span>
-                        <button
-                          type="button"
-                          className="ml-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
+                      {sizes.map((size) => (
+                        <div key={size} className="flex items-center border rounded-full px-3 py-1">
+                          <span className="text-sm">{size}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSize(size)}
+                            className="ml-1 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {sizes.length === 0 && (
+                        <p className="text-sm text-muted-foreground">No sizes added yet</p>
+                      )}
                     </div>
                   </div>
                   
+                  {/* Colors */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <Label>Available Colors</Label>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        className="h-8"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Color
-                      </Button>
+                      <Dialog open={isOpenColorDialog} onOpenChange={setIsOpenColorDialog}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            className="h-8"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Color
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Add New Color</DialogTitle>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="new-color-name">Color Name</Label>
+                              <Input 
+                                id="new-color-name" 
+                                placeholder="E.g., Navy Blue"
+                                value={newColor.name}
+                                onChange={(e) => setNewColor({...newColor, name: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="new-color-hex">Color Code</Label>
+                              <div className="flex gap-2 items-center">
+                                <div 
+                                  className="w-8 h-8 rounded border" 
+                                  style={{ backgroundColor: newColor.hex }}
+                                />
+                                <Input 
+                                  id="new-color-hex" 
+                                  type="color"
+                                  value={newColor.hex}
+                                  onChange={(e) => setNewColor({...newColor, hex: e.target.value})}
+                                  className="w-full h-10"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              type="button" 
+                              onClick={handleAddColor}
+                            >
+                              Add Color
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <div className="flex items-center border rounded-full px-3 py-1">
-                        <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                        <span className="text-sm">Red</span>
-                        <button
-                          type="button"
-                          className="ml-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <div className="flex items-center border rounded-full px-3 py-1">
-                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                        <span className="text-sm">Blue</span>
-                        <button
-                          type="button"
-                          className="ml-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <div className="flex items-center border rounded-full px-3 py-1">
-                        <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                        <span className="text-sm">Green</span>
-                        <button
-                          type="button"
-                          className="ml-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
+                      {colors.map((color) => (
+                        <div key={color.name} className="flex items-center border rounded-full px-3 py-1">
+                          <span 
+                            className="w-3 h-3 rounded-full mr-2" 
+                            style={{ backgroundColor: color.hex }}
+                          ></span>
+                          <span className="text-sm">{color.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveColor(color.name)}
+                            className="ml-1 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {colors.length === 0 && (
+                        <p className="text-sm text-muted-foreground">No colors added yet</p>
+                      )}
                     </div>
                   </div>
                 </div>
