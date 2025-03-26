@@ -17,6 +17,14 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ArrowLeft, Plus, X, Upload, Image } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,11 +39,27 @@ const categories = [
   "Sports",
 ];
 
+// Define subcategories for each main category
+const subcategories = {
+  Fashion: ["Men", "Women", "Kids", "Accessories"],
+  Beauty: ["Makeup", "Skincare", "Haircare", "Fragrances"],
+  Electronics: ["Phones", "Computers", "TVs", "Accessories"],
+  Home: ["Furniture", "Decoration", "Kitchen", "Bathroom"],
+  Jewelry: ["Rings", "Necklaces", "Earrings", "Bracelets"],
+  Food: ["Snacks", "Beverages", "Desserts", "Organic"],
+  Sports: ["Clothing", "Equipment", "Shoes", "Accessories"],
+};
+
 const AddProduct = () => {
   const navigate = useNavigate();
   const [images, setImages] = useState<string[]>([]);
   const [video, setVideo] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [customSubcategories, setCustomSubcategories] = useState<Record<string, string[]>>({});
+  const [newCategory, setNewCategory] = useState<string>("");
+  const [newSubcategory, setNewSubcategory] = useState<string>("");
   
   // Simulated image upload function
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +110,59 @@ const AddProduct = () => {
     setVideo(null);
   };
   
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+  };
+  
+  const handleAddCategory = () => {
+    if (!newCategory.trim()) {
+      toast.error("Please enter a category name");
+      return;
+    }
+    
+    if ([...categories, ...customCategories].includes(newCategory)) {
+      toast.error("This category already exists");
+      return;
+    }
+    
+    setCustomCategories([...customCategories, newCategory]);
+    setCustomSubcategories({
+      ...customSubcategories,
+      [newCategory]: []
+    });
+    setSelectedCategory(newCategory);
+    setNewCategory("");
+    toast.success("Category added successfully");
+  };
+  
+  const handleAddSubcategory = () => {
+    if (!selectedCategory) {
+      toast.error("Please select a category first");
+      return;
+    }
+    
+    if (!newSubcategory.trim()) {
+      toast.error("Please enter a subcategory name");
+      return;
+    }
+    
+    const existingSubcats = customSubcategories[selectedCategory] || [];
+    const defaultSubcats = subcategories[selectedCategory as keyof typeof subcategories] || [];
+    
+    if ([...defaultSubcats, ...existingSubcats].includes(newSubcategory)) {
+      toast.error("This subcategory already exists");
+      return;
+    }
+    
+    setCustomSubcategories({
+      ...customSubcategories,
+      [selectedCategory]: [...existingSubcats, newSubcategory]
+    });
+    
+    setNewSubcategory("");
+    toast.success("Subcategory added successfully");
+  };
+  
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     
@@ -97,6 +174,16 @@ const AddProduct = () => {
     // Simulate form submission
     toast.success("Product added successfully");
     navigate("/seller/dashboard");
+  };
+  
+  // Get all subcategories for the selected category
+  const getSubcategories = () => {
+    if (!selectedCategory) return [];
+    
+    const defaultSubcats = subcategories[selectedCategory as keyof typeof subcategories] || [];
+    const customSubcats = customSubcategories[selectedCategory] || [];
+    
+    return [...defaultSubcats, ...customSubcats];
   };
   
   return (
@@ -247,20 +334,137 @@ const AddProduct = () => {
                       <Label htmlFor="category">
                         Category <span className="text-muted-foreground text-sm">• Required</span>
                       </Label>
-                      <Select required>
-                        <SelectTrigger id="category">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center gap-2">
+                        <Select 
+                          value={selectedCategory}
+                          onValueChange={handleCategoryChange}
+                          required
+                        >
+                          <SelectTrigger id="category" className="flex-1">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                            {customCategories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-10 px-3"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add New Category</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="new-category">Category Name</Label>
+                                <Input 
+                                  id="new-category" 
+                                  placeholder="E.g., Handmade"
+                                  value={newCategory}
+                                  onChange={(e) => setNewCategory(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button 
+                                type="button" 
+                                onClick={handleAddCategory}
+                              >
+                                Add Category
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </div>
                   </div>
+                  
+                  {selectedCategory && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="subcategory">
+                          Subcategory
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <Select>
+                            <SelectTrigger id="subcategory" className="flex-1">
+                              <SelectValue placeholder="Select subcategory" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {getSubcategories().map((subcategory) => (
+                                <SelectItem key={subcategory} value={subcategory}>
+                                  {subcategory}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-10 px-3"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add New Subcategory</DialogTitle>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="category-display">Category</Label>
+                                  <Input 
+                                    id="category-display" 
+                                    value={selectedCategory}
+                                    disabled 
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="new-subcategory">Subcategory Name</Label>
+                                  <Input 
+                                    id="new-subcategory" 
+                                    placeholder="E.g., Vintage"
+                                    value={newSubcategory}
+                                    onChange={(e) => setNewSubcategory(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button 
+                                  type="button" 
+                                  onClick={handleAddSubcategory}
+                                >
+                                  Add Subcategory
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="space-y-2">
                     <Label htmlFor="description">Description</Label>
