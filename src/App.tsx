@@ -11,7 +11,6 @@ import Favorites from "./pages/Favorites";
 import Settings from "./pages/Settings";
 import SellerDashboard from "./pages/Seller/Dashboard";
 import AddProduct from "./pages/Seller/AddProduct";
-import ApiDocs from "./pages/Seller/ApiDocs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,7 +64,6 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/seller/dashboard" element={<SellerDashboard />} />
               <Route path="/seller/add-product" element={<AddProduct />} />
-              <Route path="/seller/api-docs" element={<ApiDocs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
