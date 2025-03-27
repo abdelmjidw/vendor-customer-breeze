@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -14,7 +15,11 @@ import {
   Eye,
   EyeOff,
   LogIn,
-  Phone
+  Phone,
+  Key,
+  Copy,
+  RefreshCw,
+  Code
 } from "lucide-react";
 import {
   Table,
@@ -89,6 +94,16 @@ const handleGoogleSignIn = () => {
   window.location.reload();
 };
 
+// Function to generate a random API key
+const generateApiKey = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let key = '';
+  for (let i = 0; i < 32; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return key;
+};
+
 const SellerDashboard = () => {
   const { language } = useContext(LanguageContext);
   const { 
@@ -108,6 +123,8 @@ const SellerDashboard = () => {
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
+  const [apiKey, setApiKey] = useState<string>("");
+  const [storePhone, setStorePhone] = useState(phoneNumber || "212600000000");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -123,11 +140,25 @@ const SellerDashboard = () => {
       }
     }
 
+    // Load saved API key if exists
+    const savedApiKey = localStorage.getItem("seller_api_key");
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+
+    // Load saved store phone if exists
+    const savedStorePhone = localStorage.getItem("store_phone");
+    if (savedStorePhone) {
+      setStorePhone(savedStorePhone);
+    } else if (phoneNumber) {
+      setStorePhone(phoneNumber);
+    }
+
     // Simulating loading products after authentication
     if (isAuthenticated || isGoogleAuthenticated) {
       setProducts(mockSellerProducts);
     }
-  }, [isAuthenticated, isGoogleAuthenticated]);
+  }, [isAuthenticated, isGoogleAuthenticated, phoneNumber]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +179,23 @@ const SellerDashboard = () => {
   const handleDeleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((product) => product.id !== id));
     toast.success(getTranslatedText("productDeletedSuccess"));
+  };
+
+  const handleGenerateApiKey = () => {
+    const newApiKey = generateApiKey();
+    setApiKey(newApiKey);
+    localStorage.setItem("seller_api_key", newApiKey);
+    toast.success(getTranslatedText("apiKeyGenerated"));
+  };
+
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText(apiKey);
+    toast.success(getTranslatedText("apiKeyCopied"));
+  };
+
+  const handleSaveProfile = () => {
+    localStorage.setItem("store_phone", storePhone);
+    toast.success(getTranslatedText("profileUpdated"));
   };
 
   const filteredProducts = products.filter((product) =>
@@ -246,6 +294,11 @@ const SellerDashboard = () => {
         fr: "Profil",
         ar: "الملف الشخصي",
         en: "Profile"
+      },
+      api: {
+        fr: "API",
+        ar: "واجهة برمجة التطبيقات",
+        en: "API"
       },
       searchProducts: {
         fr: "Rechercher des produits...",
@@ -361,6 +414,56 @@ const SellerDashboard = () => {
         fr: "E-mail",
         ar: "البريد الإلكتروني",
         en: "Email"
+      },
+      apiKeyManagement: {
+        fr: "Gestion des Clés API",
+        ar: "إدارة مفاتيح واجهة برمجة التطبيقات",
+        en: "API Key Management"
+      },
+      generateApiKey: {
+        fr: "Générer une Clé API",
+        ar: "إنشاء مفتاح API",
+        en: "Generate API Key"
+      },
+      regenerateApiKey: {
+        fr: "Régénérer la Clé API",
+        ar: "إعادة إنشاء مفتاح API",
+        en: "Regenerate API Key"
+      },
+      apiKeyCopied: {
+        fr: "Clé API copiée dans le presse-papiers",
+        ar: "تم نسخ مفتاح API إلى الحافظة",
+        en: "API Key copied to clipboard"
+      },
+      apiKeyGenerated: {
+        fr: "Clé API générée avec succès",
+        ar: "تم إنشاء مفتاح API بنجاح",
+        en: "API Key generated successfully"
+      },
+      apiKeyWarning: {
+        fr: "Ne partagez cette clé qu'avec des services de confiance. Elle donne accès à votre boutique.",
+        ar: "شارك هذا المفتاح فقط مع الخدمات الموثوقة. يمنح الوصول إلى متجرك.",
+        en: "Only share this key with trusted services. It grants access to your store."
+      },
+      apiDocumentation: {
+        fr: "Documentation de l'API",
+        ar: "وثائق واجهة برمجة التطبيقات",
+        en: "API Documentation"
+      },
+      apiEndpoint: {
+        fr: "Point de Terminaison API",
+        ar: "نقطة نهاية API",
+        en: "API Endpoint"
+      },
+      apiDocs: {
+        fr: "Docs de l'API",
+        ar: "وثائق API",
+        en: "API Docs"
+      },
+      phoneNumber: {
+        fr: "Numéro de téléphone",
+        ar: "رقم الهاتف",
+        en: "Phone Number"
       }
     };
 
@@ -575,6 +678,10 @@ const SellerDashboard = () => {
             <TabsTrigger value="profile" className="flex items-center gap-2">
               {getTranslatedText("profile")}
             </TabsTrigger>
+            <TabsTrigger value="api" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              <span>{getTranslatedText("api")}</span>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="products" className="space-y-4">
@@ -753,14 +860,13 @@ const SellerDashboard = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="phone" className="block text-sm font-medium">
-                      {language === 'fr' ? 'Numéro de téléphone' : 
-                       language === 'ar' ? 'رقم الهاتف' : 
-                       'Phone Number'}
+                      {getTranslatedText("phoneNumber")}
                     </label>
                     <div className="relative">
                       <Input
                         id="phone"
-                        defaultValue="212522000000"
+                        value={storePhone}
+                        onChange={(e) => setStorePhone(e.target.value)}
                         className="pl-8"
                       />
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -772,10 +878,131 @@ const SellerDashboard = () => {
               </div>
               
               <div className="pt-4 border-t">
-                <Button onClick={() => toast.success(getTranslatedText("profileUpdated"))}>
+                <Button onClick={handleSaveProfile}>
                   {getTranslatedText("saveChanges")}
                 </Button>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="api">
+            <div className="glass rounded-xl p-6 space-y-6">
+              <div>
+                <h2 className="text-xl font-medium mb-4">{getTranslatedText("apiKeyManagement")}</h2>
+                <p className="text-muted-foreground mb-6">
+                  {getTranslatedText("apiKeyWarning")}
+                </p>
+
+                {!apiKey ? (
+                  <Button 
+                    onClick={handleGenerateApiKey}
+                    className="flex items-center gap-2"
+                  >
+                    <Key className="h-4 w-4" />
+                    {getTranslatedText("generateApiKey")}
+                  </Button>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium">
+                        {getTranslatedText("apiEndpoint")}
+                      </label>
+                      <div className="relative">
+                        <Input
+                          value="https://api.example.com/v1/products"
+                          readOnly
+                          className="pr-10"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-0 top-0"
+                          onClick={() => {
+                            navigator.clipboard.writeText("https://api.example.com/v1/products");
+                            toast.success("API endpoint copied");
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium">
+                        {getTranslatedText("api")} Key
+                      </label>
+                      <div className="relative">
+                        <Input
+                          value={apiKey}
+                          readOnly
+                          className="font-mono tracking-wider pr-10"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-0 top-0"
+                          onClick={handleCopyApiKey}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline"
+                        onClick={handleGenerateApiKey}
+                        className="flex items-center gap-2"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        {getTranslatedText("regenerateApiKey")}
+                      </Button>
+                      
+                      <Button 
+                        onClick={() => navigate("/seller/api-docs")}
+                        className="flex items-center gap-2"
+                      >
+                        <Code className="h-4 w-4" />
+                        {getTranslatedText("apiDocs")}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {apiKey && (
+                <div className="mt-8 border-t pt-6">
+                  <h3 className="text-lg font-medium mb-4">{getTranslatedText("apiDocumentation")}</h3>
+                  
+                  <div className="bg-card p-4 rounded-md space-y-2 overflow-auto">
+                    <p className="font-semibold">POST /api/products</p>
+                    <p className="text-sm text-muted-foreground">Add a new product</p>
+                    
+                    <p className="font-semibold mt-4">Headers:</p>
+                    <pre className="bg-background p-2 rounded text-xs">
+{`Authorization: Bearer ${apiKey}
+Content-Type: application/json`}
+                    </pre>
+                    
+                    <p className="font-semibold mt-4">Example Request Body:</p>
+                    <pre className="bg-background p-2 rounded text-xs overflow-auto">
+{`{
+  "title": "Moroccan Ceramic Plate",
+  "price": 350,
+  "currency": "MAD",
+  "images": ["http://example.com/image1.jpg"],
+  "category": "Home Decor",
+  "location": "Fes",
+  "description": "Traditional handcrafted plate",
+  "options": {
+    "colors": ["Blue", "Green", "White"],
+    "sizes": ["Small", "Medium", "Large"]
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

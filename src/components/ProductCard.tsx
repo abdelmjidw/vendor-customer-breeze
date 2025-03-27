@@ -26,6 +26,16 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { language } = useContext(LanguageContext);
+  
+  // Get the seller's stored phone number if available
+  const getSellerWhatsApp = () => {
+    // If the current user is the seller of this product, use their stored phone
+    const storePhone = localStorage.getItem("store_phone");
+    if (product.seller.id === "seller1" && storePhone) {
+      return storePhone;
+    }
+    return product.seller.whatsapp;
+  };
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,7 +58,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
     e.preventDefault();
     
     const message = `Hello, I'm interested in your product: ${product.title}`;
-    await sendWhatsAppMessage(product.seller.whatsapp, message);
+    await sendWhatsAppMessage(getSellerWhatsApp(), message);
   };
 
   const getWhatsAppButtonText = () => {
