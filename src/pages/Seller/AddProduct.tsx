@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -277,16 +276,7 @@ const AddProduct = () => {
             </p>
           </div>
           
-          <div className="flex justify-end mb-4">
-            <Button 
-              onClick={handleApiImport}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Import from API
-            </Button>
-          </div>
+          
           
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Product Media */}
