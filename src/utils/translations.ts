@@ -26,6 +26,26 @@ const translations: Record<string, Record<SupportedLanguage, string>> = {
     fr: "Menu",
     ar: "القائمة",
     en: "Menu"
+  },
+  login: {
+    fr: "Se connecter",
+    ar: "تسجيل الدخول",
+    en: "Login"
+  },
+  authentication: {
+    fr: "Authentification",
+    ar: "المصادقة",
+    en: "Authentication"
+  },
+  logout: {
+    fr: "Déconnexion",
+    ar: "تسجيل الخروج",
+    en: "Logout"
+  },
+  myAccount: {
+    fr: "Mon compte",
+    ar: "حسابي",
+    en: "My account"
   }
 };
 

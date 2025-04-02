@@ -6,9 +6,10 @@ interface NavLinkProps {
   to: string;
   children: ReactNode;
   isActive: boolean;
+  className?: string;
 }
 
-const NavLink = ({ to, children, isActive }: NavLinkProps) => {
+const NavLink = ({ to, children, isActive, className = "" }: NavLinkProps) => {
   return (
     <Link
       to={to}
@@ -16,7 +17,7 @@ const NavLink = ({ to, children, isActive }: NavLinkProps) => {
         isActive
           ? "bg-primary text-primary-foreground"
           : "hover:bg-secondary"
-      }`}
+      } ${className}`}
     >
       {children}
     </Link>
