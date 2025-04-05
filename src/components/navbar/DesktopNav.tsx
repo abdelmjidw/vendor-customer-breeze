@@ -1,6 +1,7 @@
 
-import { Home, Heart, Settings, ShoppingBag } from "lucide-react";
+import { Home, Heart, Settings, ShoppingBag, ShoppingCart } from "lucide-react";
 import NavLink from "./NavLink";
+import { useCart } from "@/contexts/CartContext";
 
 interface DesktopNavProps {
   isActive: (path: string) => boolean;
@@ -8,11 +9,17 @@ interface DesktopNavProps {
 }
 
 const DesktopNav = ({ isActive, getTranslatedNavText }: DesktopNavProps) => {
+  const { totalItems } = useCart();
+  
   return (
     <nav className="hidden md:flex items-center space-x-1">
       <NavLink to="/" isActive={isActive("/")}>
         <Home className="h-5 w-5" />
         <span>{getTranslatedNavText("home")}</span>
+      </NavLink>
+      <NavLink to="/cart" isActive={isActive("/cart")} badge={totalItems}>
+        <ShoppingCart className="h-5 w-5" />
+        <span>{getTranslatedNavText("cart")}</span>
       </NavLink>
       <NavLink to="/favorites" isActive={isActive("/favorites")}>
         <Heart className="h-5 w-5" />

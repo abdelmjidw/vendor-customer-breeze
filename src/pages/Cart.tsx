@@ -77,14 +77,14 @@ const Cart = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleSendOrderToSeller(seller.whatsapp, items)}
-                      className="text-sm"
+                      className="text-sm bg-[#25D366] hover:bg-[#128C7E] text-white border-0 shadow-sm font-medium"
                     >
                       <Send className="h-4 w-4 mr-1" />
                       {getTranslatedText("sendByWhatsapp", language)}
                     </Button>
                   </div>
                   
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border rounded-lg overflow-hidden shadow-sm">
                     {items.map((item, index) => (
                       <div 
                         key={item.id} 
@@ -145,7 +145,7 @@ const Cart = () => {
             </div>
             
             <div className="col-span-1">
-              <div className="border rounded-lg p-6 sticky top-24">
+              <div className="border rounded-lg p-6 sticky top-24 shadow-sm">
                 <h2 className="text-lg font-medium mb-4">
                   {getTranslatedText("orderSummary", language)}
                 </h2>
@@ -177,7 +177,7 @@ const Cart = () => {
                 {Object.entries(groupedItems).map(([sellerId, { seller, items }]) => (
                   <Button 
                     key={sellerId}
-                    className="w-full mb-2 bg-[#25D366] hover:bg-[#128C7E] text-white"
+                    className="w-full mb-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm"
                     onClick={() => handleSendOrderToSeller(seller.whatsapp, items)}
                   >
                     <Send className="h-4 w-4 mr-2" />
@@ -188,7 +188,7 @@ const Cart = () => {
                 ))}
                 
                 <Link to="/">
-                  <Button variant="outline" className="w-full mt-2">
+                  <Button variant="outline" className="w-full mt-2 shadow-sm font-medium">
                     {getTranslatedText("continueShopping", language)}
                   </Button>
                 </Link>

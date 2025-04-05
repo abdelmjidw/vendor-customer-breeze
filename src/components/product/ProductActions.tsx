@@ -148,14 +148,14 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, pro
       
       <div className="grid grid-cols-2 gap-4">
         <Button 
-          className="w-full h-12 bg-[#25D366] hover:bg-[#128C7E] text-white"
+          className="w-full h-12 bg-[#25D366] hover:bg-[#128C7E] text-white font-semibold shadow-sm"
           onClick={handleWhatsAppOrder}
         >
           <ShoppingBag className="h-5 w-5 mr-2" />
           {getWhatsAppButtonText()}
         </Button>
         <Button 
-          className="w-full h-12"
+          className="w-full h-12 font-semibold shadow-sm"
           onClick={handleAddToCart}
         >
           <ShoppingCart className="h-5 w-5 mr-2" />

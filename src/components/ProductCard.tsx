@@ -1,4 +1,3 @@
-
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
@@ -120,14 +119,14 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Button 
-              className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
+              className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm"
               onClick={handleWhatsAppOrder}
               size="sm"
             >
               {getWhatsAppButtonText()}
             </Button>
             <Button
-              className="w-full"
+              className="w-full shadow-sm font-medium"
               onClick={handleAddToCart}
               size="sm"
               variant="outline"

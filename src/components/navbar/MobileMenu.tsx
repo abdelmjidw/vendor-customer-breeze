@@ -1,7 +1,8 @@
 
-import { X, Home, Heart, Settings, ShoppingBag } from "lucide-react";
+import { X, Home, Heart, Settings, ShoppingBag, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileNavLink from "./MobileNavLink";
+import { useCart } from "@/contexts/CartContext";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ const MobileMenu = ({
   getTranslatedNavText, 
   isActive 
 }: MobileMenuProps) => {
+  const { totalItems } = useCart();
+  
   if (!isOpen) return null;
 
   return (
@@ -41,6 +44,15 @@ const MobileMenu = ({
                 onClick={onClose}
               >
                 {getTranslatedNavText("home")}
+              </MobileNavLink>
+              <MobileNavLink 
+                to="/cart" 
+                icon={<ShoppingCart className="h-5 w-5" />}
+                isActive={isActive("/cart")}
+                onClick={onClose}
+                badge={totalItems}
+              >
+                {getTranslatedNavText("cart")}
               </MobileNavLink>
               <MobileNavLink 
                 to="/favorites" 
