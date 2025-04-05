@@ -11,6 +11,7 @@ import ProductInfo from "@/components/product/ProductInfo";
 import ProductActions from "@/components/product/ProductActions";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import NotFoundMessage from "@/components/product/NotFoundMessage";
+import { getTranslatedText } from "@/utils/translations";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -86,14 +87,7 @@ const ProductDetail = () => {
   }, [id]);
 
   const getBackToProductsText = () => {
-    switch (language) {
-      case "fr":
-        return "Retour aux produits";
-      case "ar":
-        return "العودة إلى المنتجات";
-      default:
-        return "Back to products";
-    }
+    return getTranslatedText("home", language);
   };
 
   return (
@@ -132,6 +126,7 @@ const ProductDetail = () => {
                   sellerWhatsApp={product.seller.whatsapp}
                   productTitle={product.title}
                   language={language}
+                  product={product}
                 />
               </div>
             </div>

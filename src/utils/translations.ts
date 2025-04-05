@@ -46,6 +46,61 @@ const translations: Record<string, Record<SupportedLanguage, string>> = {
     fr: "Mon compte",
     ar: "حسابي",
     en: "My account"
+  },
+  cart: {
+    fr: "Panier",
+    ar: "سلة التسوق",
+    en: "Cart"
+  },
+  addToCart: {
+    fr: "Ajouter au panier",
+    ar: "أضف إلى السلة",
+    en: "Add to cart"
+  },
+  viewCart: {
+    fr: "Voir le panier",
+    ar: "عرض السلة",
+    en: "View cart"
+  },
+  orderSummary: {
+    fr: "Résumé de la commande",
+    ar: "ملخص الطلب",
+    en: "Order summary"
+  },
+  sendOrder: {
+    fr: "Envoyer la commande",
+    ar: "إرسال الطلب",
+    en: "Send order"
+  },
+  sendByWhatsapp: {
+    fr: "Envoyer par WhatsApp",
+    ar: "إرسال عبر واتساب",
+    en: "Send by WhatsApp"
+  },
+  removeFromCart: {
+    fr: "Retirer du panier",
+    ar: "إزالة من السلة",
+    en: "Remove from cart"
+  },
+  total: {
+    fr: "Total",
+    ar: "المجموع",
+    en: "Total"
+  },
+  quantity: {
+    fr: "Quantité",
+    ar: "الكمية",
+    en: "Quantity"
+  },
+  emptyCart: {
+    fr: "Votre panier est vide",
+    ar: "سلة التسوق فارغة",
+    en: "Your cart is empty"
+  },
+  continueShopping: {
+    fr: "Continuer vos achats",
+    ar: "مواصلة التسوق",
+    en: "Continue shopping"
   }
 };
 

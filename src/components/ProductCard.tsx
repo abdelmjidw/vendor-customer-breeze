@@ -1,11 +1,13 @@
 
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { sendWhatsAppMessage } from "@/services/whatsappService";
 import { LanguageContext } from "@/App";
+import { useCart } from "@/contexts/CartContext";
+import { getTranslatedText } from "@/utils/translations";
 
 export interface ProductProps {
   id: string;
@@ -26,6 +28,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { language } = useContext(LanguageContext);
+  const { addToCart } = useCart();
   
   // Get the seller's stored phone number if available
   const getSellerWhatsApp = () => {
@@ -61,15 +64,18 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
     await sendWhatsAppMessage(getSellerWhatsApp(), message);
   };
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+  };
+
   const getWhatsAppButtonText = () => {
-    switch (language) {
-      case "fr":
-        return "Commander sur WhatsApp";
-      case "ar":
-        return "اطلب عبر واتساب";
-      default:
-        return "Order on WhatsApp";
-    }
+    return getTranslatedText("sendByWhatsapp", language);
+  };
+
+  const getAddToCartButtonText = () => {
+    return getTranslatedText("addToCart", language);
   };
 
   return (
@@ -112,12 +118,24 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
           <div className="mt-3">
             <p className="text-xs text-muted-foreground">{product.location}</p>
           </div>
-          <Button 
-            className="mt-4 w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
-            onClick={handleWhatsAppOrder}
-          >
-            {getWhatsAppButtonText()}
-          </Button>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Button 
+              className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
+              onClick={handleWhatsAppOrder}
+              size="sm"
+            >
+              {getWhatsAppButtonText()}
+            </Button>
+            <Button
+              className="w-full"
+              onClick={handleAddToCart}
+              size="sm"
+              variant="outline"
+            >
+              <ShoppingCart className="w-4 h-4 mr-1" />
+              {getAddToCartButtonText()}
+            </Button>
+          </div>
         </div>
       </div>
     </Link>

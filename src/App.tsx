@@ -15,6 +15,8 @@ import ApiDocs from "./pages/Seller/ApiDocs";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
+import Cart from "./pages/Cart";
+import { CartProvider } from "./contexts/CartContext";
 
 const queryClient = new QueryClient();
 
@@ -56,24 +58,27 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage }}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/seller/dashboard" element={<SellerDashboard />} />
-              <Route path="/seller/add-product" element={<AddProduct />} />
-              <Route path="/seller/api-docs" element={<ApiDocs />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                <Route path="/seller/add-product" element={<AddProduct />} />
+                <Route path="/seller/api-docs" element={<ApiDocs />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CartProvider>
       </LanguageContext.Provider>
     </QueryClientProvider>
   );

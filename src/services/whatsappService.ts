@@ -1,5 +1,6 @@
 
 import { toast } from "sonner";
+import { ProductProps } from "@/components/ProductCard";
 
 // WhatsApp Cloud API Configuration
 // Replace these with your actual credentials from Meta Developer Dashboard
@@ -115,6 +116,66 @@ export const sendWhatsAppMessage = async (
   } catch (error) {
     console.error("Error sending WhatsApp message:", error);
     toast.error("Failed to send message. Please try again.");
+    return false;
+  }
+};
+
+// Function to send cart order via WhatsApp
+export const sendCartOrder = async (
+  phone: string,
+  products: Array<ProductProps & { quantity: number }>,
+  language: string = 'fr'
+): Promise<boolean> => {
+  try {
+    // Format phone number
+    const formattedPhone = phone.startsWith('+') 
+      ? phone.substring(1) 
+      : phone;
+    
+    // Create order message
+    let message: string;
+    
+    switch (language) {
+      case 'ar':
+        message = "طلب جديد:\n\n";
+        break;
+      case 'fr':
+        message = "Nouvelle commande:\n\n";
+        break;
+      default:
+        message = "New order:\n\n";
+    }
+    
+    let totalAmount = 0;
+    
+    // Add each product to the message
+    products.forEach((product, index) => {
+      const productTotal = product.price * product.quantity;
+      totalAmount += productTotal;
+      
+      message += `${index + 1}. ${product.title} x ${product.quantity}\n`;
+      message += `   ${product.price} ${product.currency} x ${product.quantity} = ${productTotal} ${product.currency}\n\n`;
+    });
+    
+    // Add total
+    switch (language) {
+      case 'ar':
+        message += `المجموع: ${totalAmount} ${products[0]?.currency || 'MAD'}`;
+        break;
+      case 'fr':
+        message += `Total: ${totalAmount} ${products[0]?.currency || 'MAD'}`;
+        break;
+      default:
+        message += `Total: ${totalAmount} ${products[0]?.currency || 'MAD'}`;
+    }
+    
+    // Open WhatsApp with the message
+    window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+    
+    return true;
+  } catch (error) {
+    console.error("Error sending WhatsApp order:", error);
+    toast.error("Failed to send order. Please try again.");
     return false;
   }
 };

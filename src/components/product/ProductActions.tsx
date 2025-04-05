@@ -1,20 +1,25 @@
 
 import { useState, useEffect } from "react";
-import { Heart, Share2, ShoppingBag } from "lucide-react";
+import { Heart, Share2, ShoppingBag, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Language } from "@/App";
+import { useCart } from "@/contexts/CartContext";
+import { ProductProps } from "@/components/ProductCard";
+import { getTranslatedText } from "@/utils/translations";
 
 interface ProductActionsProps {
   productId: string;
   sellerWhatsApp: string;
   productTitle: string;
   language: Language;
+  product?: ProductProps;
 }
 
-const ProductActions = ({ productId, sellerWhatsApp, productTitle, language }: ProductActionsProps) => {
+const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, product }: ProductActionsProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const { addToCart } = useCart();
 
   // Check if product is in favorites when component mounts
   useEffect(() => {
@@ -94,15 +99,18 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language }: P
     );
   };
 
-  const getWhatsAppButtonText = () => {
-    switch (language) {
-      case "fr":
-        return "Commander sur WhatsApp";
-      case "ar":
-        return "اطلب عبر واتساب";
-      default:
-        return "Order on WhatsApp";
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product);
     }
+  };
+
+  const getWhatsAppButtonText = () => {
+    return getTranslatedText("sendByWhatsapp", language);
+  };
+
+  const getAddToCartButtonText = () => {
+    return getTranslatedText("addToCart", language);
   };
 
   return (
@@ -128,15 +136,32 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language }: P
         >
           <Share2 className="h-5 w-5" />
         </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-10 w-10 rounded-full"
+          onClick={handleAddToCart}
+        >
+          <ShoppingCart className="h-5 w-5" />
+        </Button>
       </div>
       
-      <Button 
-        className="w-full h-12 bg-[#25D366] hover:bg-[#128C7E] text-white"
-        onClick={handleWhatsAppOrder}
-      >
-        <ShoppingBag className="h-5 w-5 mr-2" />
-        {getWhatsAppButtonText()}
-      </Button>
+      <div className="grid grid-cols-2 gap-4">
+        <Button 
+          className="w-full h-12 bg-[#25D366] hover:bg-[#128C7E] text-white"
+          onClick={handleWhatsAppOrder}
+        >
+          <ShoppingBag className="h-5 w-5 mr-2" />
+          {getWhatsAppButtonText()}
+        </Button>
+        <Button 
+          className="w-full h-12"
+          onClick={handleAddToCart}
+        >
+          <ShoppingCart className="h-5 w-5 mr-2" />
+          {getAddToCartButtonText()}
+        </Button>
+      </div>
     </div>
   );
 };
