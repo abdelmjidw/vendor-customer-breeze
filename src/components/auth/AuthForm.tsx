@@ -1,496 +1,371 @@
 
-import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Phone, Key, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LanguageContext, Language } from "@/App";
+import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { LanguageContext } from "@/App";
+import { getTranslatedText, SupportedLanguage } from "@/utils/translations";
+import { Separator } from "@/components/ui/separator";
 
-// Authentication form component
-export default function AuthForm() {
-  const navigate = useNavigate();
-  const { language } = useContext(LanguageContext);
-  const [isLoading, setIsLoading] = useState(false);
+const AuthForm = () => {
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [showVerification, setShowVerification] = useState(false);
-
-  // Translation function
-  const getTranslatedText = (key: string) => {
-    const translations: Record<string, Record<string, string>> = {
-      emailLogin: {
-        fr: "Email",
-        ar: "البريد الإلكتروني",
-        en: "Email"
-      },
-      phoneLogin: {
-        fr: "Téléphone",
-        ar: "الهاتف",
-        en: "Phone"
-      },
-      emailAddress: {
-        fr: "Adresse email",
-        ar: "عنوان البريد الإلكتروني",
-        en: "Email address"
-      },
-      password: {
-        fr: "Mot de passe",
-        ar: "كلمة المرور",
-        en: "Password"
-      },
-      login: {
-        fr: "Se connecter",
-        ar: "تسجيل الدخول",
-        en: "Login"
-      },
-      signup: {
-        fr: "S'inscrire",
-        ar: "التسجيل",
-        en: "Sign up"
-      },
-      loading: {
-        fr: "Chargement...",
-        ar: "جار التحميل...",
-        en: "Loading..."
-      },
-      orContinueWith: {
-        fr: "Ou continuer avec",
-        ar: "أو المتابعة باستخدام",
-        en: "Or continue with"
-      },
-      googleSignIn: {
-        fr: "Continuer avec Google",
-        ar: "المتابعة باستخدام Google",
-        en: "Continue with Google"
-      },
-      appleSignIn: {
-        fr: "Continuer avec Apple",
-        ar: "المتابعة باستخدام Apple",
-        en: "Continue with Apple"
-      },
-      phoneNumber: {
-        fr: "Numéro de téléphone",
-        ar: "رقم الهاتف",
-        en: "Phone number"
-      },
-      sendCode: {
-        fr: "Envoyer le code",
-        ar: "إرسال الرمز",
-        en: "Send code"
-      },
-      sendingCode: {
-        fr: "Envoi du code...",
-        ar: "جاري إرسال الرمز...",
-        en: "Sending code..."
-      },
-      verificationCode: {
-        fr: "Code de vérification",
-        ar: "رمز التحقق",
-        en: "Verification code"
-      },
-      verify: {
-        fr: "Vérifier",
-        ar: "تحقق",
-        en: "Verify"
-      },
-      verifying: {
-        fr: "Vérification...",
-        ar: "جاري التحقق...",
-        en: "Verifying..."
-      },
-      changeNumber: {
-        fr: "Changer le numéro",
-        ar: "تغيير الرقم",
-        en: "Change number"
-      },
-      resendCode: {
-        fr: "Renvoyer le code",
-        ar: "إعادة إرسال الرمز",
-        en: "Resend code"
-      },
-      authTitle: {
-        fr: "Authentification",
-        ar: "المصادقة",
-        en: "Authentication"
-      },
-      authDescription: {
-        fr: "Connectez-vous ou créez un compte pour continuer",
-        ar: "تسجيل الدخول أو إنشاء حساب للمتابعة",
-        en: "Sign in or create an account to continue"
-      },
-      errors: {
-        emptyFields: {
-          fr: "Veuillez remplir tous les champs",
-          ar: "يرجى ملء جميع الحقول",
-          en: "Please fill in all fields"
-        },
-        invalidPhone: {
-          fr: "Numéro de téléphone invalide",
-          ar: "رقم هاتف غير صالح",
-          en: "Invalid phone number"
-        },
-        invalidEmail: {
-          fr: "Adresse email invalide",
-          ar: "عنوان بريد إلكتروني غير صالح",
-          en: "Invalid email address"
-        },
-        authError: {
-          fr: "Erreur d'authentification",
-          ar: "خطأ في المصادقة",
-          en: "Authentication error"
-        }
-      }
-    };
-
-    return translations[key]?.[language] || translations[key]?.en || key;
-  };
-
-  // Handle email login/signup
-  const handleEmailAuth = async (type: 'login' | 'signup') => {
-    try {
-      setIsLoading(true);
-
-      if (!email || !password) {
-        toast.error(getTranslatedText("errors.emptyFields"));
-        return;
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        toast.error(getTranslatedText("errors.invalidEmail"));
-        return;
-      }
-
-      if (type === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-        
-        toast.success("Connexion réussie");
+  const { language } = useContext(LanguageContext);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Set up listener for OTP verification process
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
         navigate("/");
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-          }
-        });
-
-        if (error) throw error;
-        
-        toast.success("Inscription réussie, veuillez vérifier votre email");
       }
-    } catch (error) {
-      console.error("Email auth error:", error);
-      toast.error(error.message || getTranslatedText("errors.authError"));
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      toast.success(getTranslatedText("checkEmail", language as SupportedLanguage));
+    } catch (error: any) {
+      toast.error(error.error_description || error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-
-  // Handle phone authentication - send code
-  const handleSendPhoneCode = async () => {
+  
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      setIsLoading(true);
-
-      if (!phoneNumber) {
-        toast.error(getTranslatedText("errors.emptyFields"));
-        return;
-      }
-
-      // Validate and format phone number
-      let formattedPhone = phoneNumber;
-      if (!formattedPhone.startsWith('+')) {
-        formattedPhone = '+' + formattedPhone;
-      }
-
+      setLoading(true);
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.error_description || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handlePhoneSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+      
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
       });
-
+      
       if (error) throw error;
       
       setShowVerification(true);
-      toast.success("Code envoyé avec succès");
-    } catch (error) {
-      console.error("Phone auth error:", error);
-      toast.error(error.message || getTranslatedText("errors.authError"));
+      toast.success(getTranslatedText("codeSent", language as SupportedLanguage));
+    } catch (error: any) {
+      toast.error(error.error_description || error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-
-  // Handle phone verification
-  const handleVerifyPhoneCode = async () => {
+  
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      setIsLoading(true);
-
-      if (!verificationCode) {
-        toast.error(getTranslatedText("errors.emptyFields"));
-        return;
-      }
-
-      let formattedPhone = phoneNumber;
-      if (!formattedPhone.startsWith('+')) {
-        formattedPhone = '+' + formattedPhone;
-      }
-
+      setLoading(true);
+      
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+      
       const { error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
         token: verificationCode,
         type: 'sms',
       });
-
+      
       if (error) throw error;
-
-      toast.success("Vérification réussie");
-      navigate("/");
-    } catch (error) {
-      console.error("Verification error:", error);
-      toast.error(error.message || getTranslatedText("errors.authError"));
+      
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.error_description || error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Handle social logins
-  const handleSocialLogin = async (provider: 'google' | 'apple') => {
+  const handleOAuthSignIn = async (provider: 'google' | 'apple') => {
     try {
-      setIsLoading(true);
-      
+      setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: provider === 'google' ? {
-            prompt: 'select_account', // Force Google to show account selection
-          } : undefined,
-        }
+        },
       });
-
-      if (error) throw error;
       
-    } catch (error) {
-      console.error(`${provider} login error:`, error);
-      toast.error(error.message || getTranslatedText("errors.authError"));
-      setIsLoading(false);
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.error_description || error.message);
+      setLoading(false);
     }
   };
-
+  
+  if (showVerification) {
+    return (
+      <div className="glass rounded-2xl p-8 w-full max-w-md mx-auto">
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          {getTranslatedText("verifyPhone", language as SupportedLanguage)}
+        </h2>
+        
+        <form onSubmit={handleVerifyOTP} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {getTranslatedText("verificationCode", language as SupportedLanguage)}
+            </label>
+            <Input
+              type="text" 
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              placeholder={getTranslatedText("enterCode", language as SupportedLanguage)}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              {getTranslatedText("codeInfo", language as SupportedLanguage)} {phoneNumber}
+            </p>
+          </div>
+          
+          <div className="flex justify-between">
+            <button 
+              type="button"
+              className="text-sm text-muted-foreground hover:text-primary"
+              onClick={() => setShowVerification(false)}
+            >
+              {getTranslatedText("changePhone", language as SupportedLanguage)}
+            </button>
+            
+            <button
+              type="button"
+              className="text-sm text-muted-foreground hover:text-primary"
+              onClick={() => handlePhoneSignIn(new Event('click') as any)}
+            >
+              {getTranslatedText("resendCode", language as SupportedLanguage)}
+            </button>
+          </div>
+          
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? getTranslatedText("verifying", language as SupportedLanguage) : getTranslatedText("verify", language as SupportedLanguage)}
+          </Button>
+        </form>
+      </div>
+    );
+  }
+  
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">{getTranslatedText("authTitle")}</CardTitle>
-        <CardDescription>{getTranslatedText("authDescription")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="email" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="email">{getTranslatedText("emailLogin")}</TabsTrigger>
-            <TabsTrigger value="phone">{getTranslatedText("phoneLogin")}</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="email" className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                {getTranslatedText("emailAddress")}
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+    <div className="glass rounded-2xl p-8 w-full max-w-md mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gradient">
+        {getTranslatedText("authentication", language as SupportedLanguage)}
+      </h1>
+      
+      <Tabs defaultValue="email">
+        <TabsList className="grid grid-cols-3 mb-8">
+          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="phone">{getTranslatedText("phone", language as SupportedLanguage)}</TabsTrigger>
+          <TabsTrigger value="oauth">{getTranslatedText("social", language as SupportedLanguage)}</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="email">
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                variant="outline" 
+                className={language === 'ar' ? 'order-last' : ''}
+                onClick={() => document.getElementById('signin-form')?.classList.remove('hidden')}
+              >
+                {getTranslatedText("signIn", language as SupportedLanguage)}
+              </Button>
+              <Button
+                onClick={() => document.getElementById('signup-form')?.classList.remove('hidden')}
+              >
+                {getTranslatedText("signUp", language as SupportedLanguage)}
+              </Button>
             </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                {getTranslatedText("password")}
-              </label>
-              <div className="relative">
+            
+            <form id="signin-form" onSubmit={handleEmailSignIn} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)} 
+                  placeholder="your@email.com"
                   required
                 />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
               </div>
-            </div>
-            <div className="flex gap-2 pt-2">
-              <Button
-                className="flex-1"
-                onClick={() => handleEmailAuth('login')}
-                disabled={isLoading}
-              >
-                {isLoading ? getTranslatedText("loading") : getTranslatedText("login")}
-              </Button>
-              <Button
-                className="flex-1"
-                variant="outline"
-                onClick={() => handleEmailAuth('signup')}
-                disabled={isLoading}
-              >
-                {isLoading ? getTranslatedText("loading") : getTranslatedText("signup")}
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="phone" className="space-y-4">
-            {!showVerification ? (
-              <div>
-                <div className="space-y-2">
-                  <label htmlFor="phone" className="text-sm font-medium">
-                    {getTranslatedText("phoneNumber")}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="212XXXXXXXXX"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="pl-8"
-                      required
-                    />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      +
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  className="w-full mt-4"
-                  onClick={handleSendPhoneCode}
-                  disabled={isLoading}
-                >
-                  {isLoading ? getTranslatedText("sendingCode") : getTranslatedText("sendCode")}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="verification-code" className="text-sm font-medium">
-                    {getTranslatedText("verificationCode")}
-                  </label>
-                  <InputOTP
-                    value={verificationCode}
-                    onChange={setVerificationCode}
-                    maxLength={6}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    className="flex-1"
-                    onClick={handleVerifyPhoneCode}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? getTranslatedText("verifying") : getTranslatedText("verify")}
-                  </Button>
-                </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{getTranslatedText("password", language as SupportedLanguage)}</label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="pr-10"
+                    required
+                  />
                   <button
                     type="button"
-                    className="hover:text-foreground"
-                    onClick={() => setShowVerification(false)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    onClick={() => setShowPassword(!showPassword)}
                   >
-                    {getTranslatedText("changeNumber")}
-                  </button>
-                  <button
-                    type="button"
-                    className="hover:text-foreground"
-                    onClick={handleSendPhoneCode}
-                    disabled={isLoading}
-                  >
-                    {getTranslatedText("resendCode")}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t"></span>
+              
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? getTranslatedText("signingIn", language as SupportedLanguage) : getTranslatedText("signIn", language as SupportedLanguage)}
+              </Button>
+            </form>
+            
+            <form id="signup-form" onSubmit={handleEmailSignUp} className="space-y-4 hidden">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{getTranslatedText("password", language as SupportedLanguage)}</label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? getTranslatedText("signingUp", language as SupportedLanguage) : getTranslatedText("signUp", language as SupportedLanguage)}
+              </Button>
+            </form>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">
-              {getTranslatedText("orContinueWith")}
-            </span>
-          </div>
-        </div>
+        </TabsContent>
+        
+        <TabsContent value="phone">
+          <form onSubmit={handlePhoneSignIn} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {getTranslatedText("phoneNumber", language as SupportedLanguage)}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2">+</span>
+                <Input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="pl-8"
+                  placeholder="212601010101"
+                  required
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {getTranslatedText("codeBySMS", language as SupportedLanguage)}
+              </p>
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? getTranslatedText("sendingCode", language as SupportedLanguage) : getTranslatedText("sendCode", language as SupportedLanguage)}
+            </Button>
+          </form>
+        </TabsContent>
+        
+        <TabsContent value="oauth">
+          <div className="grid gap-4">
+            <Button
+              variant="outline"
+              onClick={() => handleOAuthSignIn('google')}
+              className="w-full flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.6,20H24v8h11.3c-1.1,5.2-5.5,8-11.3,8c-6.6,0-12-5.4-12-12s5.4-12,12-12c3,0,5.8,1.1,7.9,3l6-6 C33.7,5.9,29,4,24,4C13,4,4,13,4,24s9,20,20,20s19-9,19-20C43,22.7,42.9,21.3,43.6,20z"/>
+                <path fill="#FF3D00" d="M6.3,14.7l7,5.4c1.8-5.1,6.7-8.1,12.8-8.1c3,0,5.8,1.1,7.9,3l6-6C33.7,5.9,29,4,24,4 C16.8,4,10.4,8.3,6.3,14.7z"/>
+                <path fill="#4CAF50" d="M24,44c4.9,0,9.5-1.8,12.9-4.9l-6.6-5.2c-1.8,1.2-4.3,2.1-6.3,2.1c-5.8,0-10.2-3.9-11.3-9.1l-6.8,5.2 C9.1,39.3,16.1,44,24,44z"/>
+                <path fill="#1976D2" d="M43.6,20H24v8h11.3c-0.5,2.6-2.1,4.8-4.2,6.3l0,0l6.6,5.2c-0.4,0.3,6.7-4.9,6.7-15.5 C43,22.7,42.9,21.3,43.6,20z"/>
+              </svg>
+              Google
+            </Button>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => handleSocialLogin('google')}
-            disabled={isLoading}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" className="mr-2">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
-            Google
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => handleSocialLogin('apple')}
-            disabled={isLoading}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" className="mr-2">
-              <path d="M16.03 10.4c.02 2.65 2.33 3.53 2.35 3.54-.02.06-.35 1.2-1.15 2.38-.7.02-1.7 1.35-2.8 1.35-1.08 0-1.42-.64-2.65-.64-1.22 0-1.6.62-2.62.66-1.03.04-1.82-1.02-2.53-2.03-1.38-1.98-2.44-5.6-1.02-8.04.7-1.2 1.96-1.96 3.32-1.98 1.04-.02 2.02.7 2.65.7s1.8-.86 3.04-.74c.52.02 1.98.2 2.92 1.56-.07.05-1.74 1.02-1.72 3.02M14.92 3.1c.55-.66.94-1.6.84-2.52-.8.04-1.8.54-2.38 1.2-.5.6-.96 1.56-.84 2.48.9.08 1.82-.4 2.38-1.16"></path>
-            </svg>
-            Apple
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            <Button
+              variant="outline"
+              onClick={() => handleOAuthSignIn('apple')}
+              className="w-full flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 384 512">
+                <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+              </svg>
+              Apple
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
-}
+};
+
+export default AuthForm;
