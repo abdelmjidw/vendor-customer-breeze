@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Heart, Share2, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Heart, Share2, ShoppingBag, ShoppingCart, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,14 +105,6 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, pro
     }
   };
 
-  const getWhatsAppButtonText = () => {
-    return getTranslatedText("sendByWhatsapp", language);
-  };
-
-  const getAddToCartButtonText = () => {
-    return getTranslatedText("addToCart", language);
-  };
-
   return (
     <div>
       <div className="flex space-x-2 mb-6">
@@ -146,20 +138,20 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, pro
         </Button>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex gap-4">
         <Button 
-          className="w-full h-12 bg-[#25D366] hover:bg-[#128C7E] text-white font-semibold shadow-sm"
+          className="flex-1 h-12 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm rounded-full"
           onClick={handleWhatsAppOrder}
         >
-          <ShoppingBag className="h-5 w-5 mr-2" />
-          {getWhatsAppButtonText()}
+          <Send className="h-5 w-5 mr-2" />
+          {getTranslatedText("sendByWhatsapp", language)}
         </Button>
         <Button 
-          className="w-full h-12 font-semibold shadow-sm"
+          className="flex-1 h-12 font-medium shadow-sm rounded-full"
           onClick={handleAddToCart}
         >
           <ShoppingCart className="h-5 w-5 mr-2" />
-          {getAddToCartButtonText()}
+          {getTranslatedText("addToCart", language)}
         </Button>
       </div>
     </div>

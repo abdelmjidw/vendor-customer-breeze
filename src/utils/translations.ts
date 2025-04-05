@@ -202,6 +202,17 @@ const translations: Record<string, Record<SupportedLanguage, string>> = {
     fr: "Vérifier",
     ar: "تحقق",
     en: "Verify"
+  },
+  // New minimal UI translations
+  addToCartShort: {
+    fr: "Ajouter",
+    ar: "أضف",
+    en: "Add"
+  },
+  sendShort: {
+    fr: "Envoyer",
+    ar: "إرسال",
+    en: "Send"
   }
 };
 

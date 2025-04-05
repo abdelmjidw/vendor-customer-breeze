@@ -63,7 +63,7 @@ const Cart = () => {
             <h2 className="text-xl font-medium mb-2">{getTranslatedText("emptyCart", language)}</h2>
             <p className="text-muted-foreground mb-6">{getTranslatedText("continueShopping", language)}</p>
             <Link to="/">
-              <Button>{getTranslatedText("continueShopping", language)}</Button>
+              <Button className="rounded-full">{getTranslatedText("continueShopping", language)}</Button>
             </Link>
           </div>
         ) : (
@@ -74,10 +74,10 @@ const Cart = () => {
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-medium">{seller.name}</h2>
                     <Button 
-                      variant="outline"
+                      variant="whatsapp"
                       size="sm"
                       onClick={() => handleSendOrderToSeller(seller.whatsapp, items)}
-                      className="text-sm bg-[#25D366] hover:bg-[#128C7E] text-white border-0 shadow-sm font-medium"
+                      className="text-sm rounded-full shadow-sm font-medium"
                     >
                       <Send className="h-4 w-4 mr-1" />
                       {getTranslatedText("sendByWhatsapp", language)}
@@ -105,11 +105,11 @@ const Cart = () => {
                           <p className="text-sm text-muted-foreground">{item.currency} {item.price.toLocaleString()}</p>
                         </div>
                         
-                        <div className="flex items-center border rounded-md">
+                        <div className="flex items-center border rounded-full">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 rounded-full"
                             onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                           >
                             <Minus className="h-4 w-4" />
@@ -118,7 +118,7 @@ const Cart = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 rounded-full"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           >
                             <Plus className="h-4 w-4" />
@@ -132,7 +132,7 @@ const Cart = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-full"
                           onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -177,7 +177,7 @@ const Cart = () => {
                 {Object.entries(groupedItems).map(([sellerId, { seller, items }]) => (
                   <Button 
                     key={sellerId}
-                    className="w-full mb-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm"
+                    className="w-full mb-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm rounded-full"
                     onClick={() => handleSendOrderToSeller(seller.whatsapp, items)}
                   >
                     <Send className="h-4 w-4 mr-2" />
@@ -188,7 +188,7 @@ const Cart = () => {
                 ))}
                 
                 <Link to="/">
-                  <Button variant="outline" className="w-full mt-2 shadow-sm font-medium">
+                  <Button variant="outline" className="w-full mt-2 shadow-sm font-medium rounded-full">
                     {getTranslatedText("continueShopping", language)}
                   </Button>
                 </Link>

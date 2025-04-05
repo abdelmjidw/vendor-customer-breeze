@@ -1,6 +1,7 @@
+
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { sendWhatsAppMessage } from "@/services/whatsappService";
@@ -69,14 +70,6 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
     addToCart(product);
   };
 
-  const getWhatsAppButtonText = () => {
-    return getTranslatedText("sendByWhatsapp", language);
-  };
-
-  const getAddToCartButtonText = () => {
-    return getTranslatedText("addToCart", language);
-  };
-
   return (
     <Link to={`/product/${product.id}`} className="block">
       <div className="relative rounded-xl overflow-hidden card-hover h-full bg-card">
@@ -103,6 +96,24 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
               }`}
             />
           </button>
+          
+          {/* Add quick action buttons directly on the image */}
+          <div className="absolute bottom-3 right-3 flex gap-2">
+            <button
+              onClick={handleWhatsAppOrder}
+              className="p-2 rounded-full bg-[#25D366] text-white shadow-sm hover:bg-[#128C7E] transition-colors"
+              aria-label={getTranslatedText("sendByWhatsapp", language)}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleAddToCart}
+              className="p-2 rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
+              aria-label={getTranslatedText("addToCart", language)}
+            >
+              <ShoppingCart className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="p-4">
           <div className="flex items-start justify-between">
@@ -116,24 +127,6 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
           </div>
           <div className="mt-3">
             <p className="text-xs text-muted-foreground">{product.location}</p>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <Button 
-              className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm"
-              onClick={handleWhatsAppOrder}
-              size="sm"
-            >
-              {getWhatsAppButtonText()}
-            </Button>
-            <Button
-              className="w-full shadow-sm font-medium"
-              onClick={handleAddToCart}
-              size="sm"
-              variant="outline"
-            >
-              <ShoppingCart className="w-4 h-4 mr-1" />
-              {getAddToCartButtonText()}
-            </Button>
           </div>
         </div>
       </div>
