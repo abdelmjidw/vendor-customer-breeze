@@ -1,3 +1,4 @@
+
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, MessageCircle } from "lucide-react";
@@ -124,9 +125,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
               {product.currency} {product.price.toLocaleString()}
             </p>
           </div>
-          <div className="mt-3">
-            <p className="text-xs text-muted-foreground">{product.location}</p>
-          </div>
+          {/* Removed location display here */}
         </div>
       </div>
     </Link>
