@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Heart, Share2, ShoppingCart, MessageCircle } from "lucide-react";
+import { Heart, Share2, ShoppingCart, MessageCircle, Facebook, Instagram, Send, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +8,11 @@ import { Language } from "@/App";
 import { useCart } from "@/contexts/CartContext";
 import { ProductProps } from "@/components/ProductCard";
 import { getTranslatedText } from "@/utils/translations";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface ProductActionsProps {
   productId: string;
@@ -18,7 +24,13 @@ interface ProductActionsProps {
 
 const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, product }: ProductActionsProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
   const { addToCart } = useCart();
+
+  // Set current page URL for sharing
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, [productId]);
 
   // Check if product is in favorites when component mounts
   useEffect(() => {
@@ -75,19 +87,41 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, pro
     }
   };
 
-  const handleShare = () => {
+  const handleShareViaWhatsApp = () => {
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${productTitle} - ${shareUrl}`)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleShareViaFacebook = () => {
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+    window.open(facebookUrl, '_blank');
+  };
+
+  const handleShareViaInstagram = () => {
+    // Instagram doesn't have a direct sharing API like Facebook or WhatsApp
+    // As a fallback, we'll copy link to clipboard with instructions
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Link copied! You can now paste it in Instagram");
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Link copied to clipboard");
+  };
+
+  // Native share API (for mobile devices)
+  const handleNativeShare = () => {
     if (navigator.share) {
       navigator.share({
         title: productTitle || 'Product',
         text: `Check out this product: ${productTitle}`,
-        url: window.location.href,
+        url: shareUrl,
       }).catch(err => {
         console.error('Could not share', err);
       });
     } else {
       // Fallback
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard");
+      handleCopyLink();
     }
   };
 
@@ -119,14 +153,65 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, pro
             }`}
           />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-10 w-10 rounded-full"
-          onClick={handleShare}
-        >
-          <Share2 className="h-5 w-5" />
-        </Button>
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 rounded-full"
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2">
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-9 w-9 rounded-full bg-[#25D366] hover:bg-[#25D366]/90 text-white"
+                onClick={handleShareViaWhatsApp}
+              >
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="h-9 w-9 rounded-full bg-[#1877F2] hover:bg-[#1877F2]/90 text-white"
+                onClick={handleShareViaFacebook}
+              >
+                <Facebook className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="h-9 w-9 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] hover:opacity-90 text-white"
+                onClick={handleShareViaInstagram}
+              >
+                <Instagram className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="h-9 w-9 rounded-full"
+                onClick={handleCopyLink}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+              {navigator.share && (
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="h-9 w-9 rounded-full"
+                  onClick={handleNativeShare}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+        
         <Button
           variant="outline"
           size="icon"
