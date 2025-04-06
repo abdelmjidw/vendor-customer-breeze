@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -19,7 +18,8 @@ import {
   Key,
   Copy,
   RefreshCw,
-  Code
+  Code,
+  Upload
 } from "lucide-react";
 import {
   Table,
@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { useWhatsAppAuth } from "@/hooks/useWhatsAppAuth";
 import { LanguageContext, Language } from "@/App";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // Mock data for demonstration
 const mockSellerProducts: ProductProps[] = [
@@ -125,6 +126,8 @@ const SellerDashboard = () => {
   const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
   const [apiKey, setApiKey] = useState<string>("");
   const [storePhone, setStorePhone] = useState(phoneNumber || "212600000000");
+  const [storeName, setStoreName] = useState("Souk Connect");
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -152,6 +155,17 @@ const SellerDashboard = () => {
       setStorePhone(savedStorePhone);
     } else if (phoneNumber) {
       setStorePhone(phoneNumber);
+    }
+    
+    // Load store name and logo from localStorage if they exist
+    const savedStoreName = localStorage.getItem("store_name");
+    if (savedStoreName) {
+      setStoreName(savedStoreName);
+    }
+
+    const savedStoreLogo = localStorage.getItem("store_logo");
+    if (savedStoreLogo) {
+      setStoreLogo(savedStoreLogo);
     }
 
     // Simulating loading products after authentication
@@ -195,7 +209,37 @@ const SellerDashboard = () => {
 
   const handleSaveProfile = () => {
     localStorage.setItem("store_phone", storePhone);
+    localStorage.setItem("store_name", storeName);
+    
+    // Force refresh to update the navbar
+    window.location.reload();
     toast.success(getTranslatedText("profileUpdated"));
+  };
+  
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check if file is jpg/jpeg
+    if (!['image/jpeg', 'image/jpg'].includes(file.type)) {
+      toast.error(getTranslatedText("jpgFormatRequired"));
+      return;
+    }
+
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(getTranslatedText("fileSizeTooLarge"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setStoreLogo(base64String);
+      localStorage.setItem("store_logo", base64String);
+      toast.success(getTranslatedText("logoUpdated"));
+    };
+    reader.readAsDataURL(file);
   };
 
   const filteredProducts = products.filter((product) =>
@@ -464,6 +508,31 @@ const SellerDashboard = () => {
         fr: "Numéro de téléphone",
         ar: "رقم الهاتف",
         en: "Phone Number"
+      },
+      jpgFormatRequired: {
+        fr: "Le fichier doit être au format JPG",
+        ar: "يجب أن يكون الملف بتنسيق JPG",
+        en: "File must be in JPG format"
+      },
+      fileSizeTooLarge: {
+        fr: "La taille du fichier doit être inférieure à 2 Mo",
+        ar: "يجب أن يكون حجم الملف أقل من 2 ميغابايت",
+        en: "File size must be less than 2MB"
+      },
+      logoUpdated: {
+        fr: "Logo mis à jour",
+        ar: "تم تحديث الشعار",
+        en: "Logo updated"
+      },
+      storeLogo: {
+        fr: "Logo de la Boutique",
+        ar: "شعار المتجر",
+        en: "Store Logo"
+      },
+      uploadLogo: {
+        fr: "Télécharger un logo (JPG)",
+        ar: "تحميل شعار (JPG)",
+        en: "Upload logo (JPG)"
       }
     };
 
@@ -741,274 +810,4 @@ const SellerDashboard = () => {
                             <div className="w-12 h-12 rounded overflow-hidden">
                               <img
                                 src={product.images[0]}
-                                alt={product.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <span className="font-medium">{product.title}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {product.category}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {product.currency} {product.price}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => navigate(`/product/${product.id}`)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => navigate(`/seller/edit-product/${product.id}`)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>{getTranslatedText("deleteProduct")}</DialogTitle>
-                                  <DialogDescription>
-                                    {getTranslatedText("deleteConfirmation")}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                  <Button
-                                    variant="ghost"
-                                    onClick={() => {}}
-                                  >
-                                    {getTranslatedText("cancel")}
-                                  </Button>
-                                  <Button
-                                    variant="destructive"
-                                    onClick={() => handleDeleteProduct(product.id)}
-                                  >
-                                    {getTranslatedText("delete")}
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="profile">
-            <div className="glass rounded-xl p-6 space-y-6">
-              <div>
-                <h2 className="text-xl font-medium mb-4">{getTranslatedText("storeInfo")}</h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label htmlFor="store-name" className="block text-sm font-medium">
-                      {getTranslatedText("storeName")}
-                    </label>
-                    <Input
-                      id="store-name"
-                      defaultValue="Moroccan Crafts"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="location" className="block text-sm font-medium">
-                      {getTranslatedText("location")}
-                    </label>
-                    <Input
-                      id="location"
-                      defaultValue="Marrakech"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="contact" className="block text-sm font-medium">
-                      {isGoogleAuthenticated ? getTranslatedText("email") : getTranslatedText("whatsAppNumber")}
-                    </label>
-                    {isGoogleAuthenticated ? (
-                      <Input
-                        id="contact"
-                        defaultValue="user@gmail.com"
-                      />
-                    ) : (
-                      <div className="relative">
-                        <Input
-                          id="contact"
-                          defaultValue={phoneNumber}
-                          className="pl-8"
-                        />
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          +
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="block text-sm font-medium">
-                      {getTranslatedText("phoneNumber")}
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="phone"
-                        value={storePhone}
-                        onChange={(e) => setStorePhone(e.target.value)}
-                        className="pl-8"
-                      />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        +
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-4 border-t">
-                <Button onClick={handleSaveProfile}>
-                  {getTranslatedText("saveChanges")}
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="api">
-            <div className="glass rounded-xl p-6 space-y-6">
-              <div>
-                <h2 className="text-xl font-medium mb-4">{getTranslatedText("apiKeyManagement")}</h2>
-                <p className="text-muted-foreground mb-6">
-                  {getTranslatedText("apiKeyWarning")}
-                </p>
-
-                {!apiKey ? (
-                  <Button 
-                    onClick={handleGenerateApiKey}
-                    className="flex items-center gap-2"
-                  >
-                    <Key className="h-4 w-4" />
-                    {getTranslatedText("generateApiKey")}
-                  </Button>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        {getTranslatedText("apiEndpoint")}
-                      </label>
-                      <div className="relative">
-                        <Input
-                          value="https://api.example.com/v1/products"
-                          readOnly
-                          className="pr-10"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0"
-                          onClick={() => {
-                            navigator.clipboard.writeText("https://api.example.com/v1/products");
-                            toast.success("API endpoint copied");
-                          }}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">
-                        {getTranslatedText("api")} Key
-                      </label>
-                      <div className="relative">
-                        <Input
-                          value={apiKey}
-                          readOnly
-                          className="font-mono tracking-wider pr-10"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0"
-                          onClick={handleCopyApiKey}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline"
-                        onClick={handleGenerateApiKey}
-                        className="flex items-center gap-2"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                        {getTranslatedText("regenerateApiKey")}
-                      </Button>
-                      
-                      <Button 
-                        onClick={() => navigate("/seller/api-docs")}
-                        className="flex items-center gap-2"
-                      >
-                        <Code className="h-4 w-4" />
-                        {getTranslatedText("apiDocs")}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {apiKey && (
-                <div className="mt-8 border-t pt-6">
-                  <h3 className="text-lg font-medium mb-4">{getTranslatedText("apiDocumentation")}</h3>
-                  
-                  <div className="bg-card p-4 rounded-md space-y-2 overflow-auto">
-                    <p className="font-semibold">POST /api/products</p>
-                    <p className="text-sm text-muted-foreground">Add a new product</p>
-                    
-                    <p className="font-semibold mt-4">Headers:</p>
-                    <pre className="bg-background p-2 rounded text-xs">
-{`Authorization: Bearer ${apiKey}
-Content-Type: application/json`}
-                    </pre>
-                    
-                    <p className="font-semibold mt-4">Example Request Body:</p>
-                    <pre className="bg-background p-2 rounded text-xs overflow-auto">
-{`{
-  "title": "Moroccan Ceramic Plate",
-  "price": 350,
-  "currency": "MAD",
-  "images": ["http://example.com/image1.jpg"],
-  "category": "Home Decor",
-  "location": "Fes",
-  "description": "Traditional handcrafted plate",
-  "options": {
-    "colors": ["Blue", "Green", "White"],
-    "sizes": ["Small", "Medium", "Large"]
-  }
-}`}
-                    </pre>
-                  </div>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
-  );
-};
-
-export default SellerDashboard;
+                                alt={product.
