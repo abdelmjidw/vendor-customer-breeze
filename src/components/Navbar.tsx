@@ -11,6 +11,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [language, setLanguage] = useState<SupportedLanguage>("fr");
+  const [storeName, setStoreName] = useState("Souk Connect");
   const location = useLocation();
 
   useEffect(() => {
@@ -27,6 +28,12 @@ const Navbar = () => {
     const savedLanguage = localStorage.getItem("app_language");
     if (savedLanguage && ["fr", "ar", "en"].includes(savedLanguage)) {
       setLanguage(savedLanguage as SupportedLanguage);
+    }
+    
+    // Get stored store name
+    const savedStoreName = localStorage.getItem("store_name");
+    if (savedStoreName) {
+      setStoreName(savedStoreName);
     }
   }, []);
 
@@ -50,7 +57,7 @@ const Navbar = () => {
             to="/" 
             className="text-xl md:text-2xl font-bold text-gradient"
           >
-            Souk Connect
+            {storeName}
           </Link>
 
           <DesktopNav 
