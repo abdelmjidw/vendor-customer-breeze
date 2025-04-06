@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Heart, Share2, ShoppingBag, ShoppingCart, WhatsApp } from "lucide-react";
+import { Heart, Share2, ShoppingCart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -143,7 +142,7 @@ const ProductActions = ({ productId, sellerWhatsApp, productTitle, language, pro
           className="flex-1 h-12 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm rounded-full"
           onClick={handleWhatsAppOrder}
         >
-          <WhatsApp className="h-5 w-5 mr-2" />
+          <MessageCircle className="h-5 w-5 mr-2" />
           {getTranslatedText("sendByWhatsapp", language)}
         </Button>
         <Button 

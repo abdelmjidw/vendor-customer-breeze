@@ -1,7 +1,6 @@
-
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { Trash2, ShoppingCart, Plus, Minus, ArrowLeft, Send } from "lucide-react";
+import { Trash2, ShoppingCart, Plus, Minus, ArrowLeft, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -79,7 +78,7 @@ const Cart = () => {
                       onClick={() => handleSendOrderToSeller(seller.whatsapp, items)}
                       className="text-sm rounded-full shadow-sm font-medium"
                     >
-                      <Send className="h-4 w-4 mr-1" />
+                      <MessageCircle className="h-4 w-4 mr-1" />
                       {getTranslatedText("sendByWhatsapp", language)}
                     </Button>
                   </div>
@@ -180,7 +179,7 @@ const Cart = () => {
                     className="w-full mb-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-medium shadow-sm rounded-full"
                     onClick={() => handleSendOrderToSeller(seller.whatsapp, items)}
                   >
-                    <Send className="h-4 w-4 mr-2" />
+                    <MessageCircle className="h-4 w-4 mr-2" />
                     {language === "fr" ? `Commander chez ${seller.name}` : 
                      language === "ar" ? `الطلب من ${seller.name}` : 
                      `Order from ${seller.name}`}

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, WhatsApp } from "lucide-react";
+import { Heart, ShoppingCart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { sendWhatsAppMessage } from "@/services/whatsappService";
@@ -103,7 +103,7 @@ const ProductCard: React.FC<{ product: ProductProps }> = ({ product }) => {
               className="p-2 rounded-full bg-[#25D366] text-white shadow-sm hover:bg-[#128C7E] transition-colors"
               aria-label={getTranslatedText("sendByWhatsapp", language)}
             >
-              <WhatsApp className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4" />
             </button>
             <button
               onClick={handleAddToCart}
