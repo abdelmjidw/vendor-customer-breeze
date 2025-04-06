@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -810,4 +811,237 @@ const SellerDashboard = () => {
                             <div className="w-12 h-12 rounded overflow-hidden">
                               <img
                                 src={product.images[0]}
-                                alt={product.
+                                alt={product.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <Link 
+                                to={`/products/${product.id}`}
+                                className="font-medium hover:underline"
+                              >
+                                {product.title}
+                              </Link>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {product.category}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {product.price} {product.currency}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="minimal" 
+                              size="minimal" 
+                              asChild
+                            >
+                              <Link to={`/seller/edit-product/${product.id}`}>
+                                <Edit className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                            
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="minimal" size="minimal" className="text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>{getTranslatedText("deleteProduct")}</DialogTitle>
+                                  <DialogDescription>
+                                    {getTranslatedText("deleteConfirmation")}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                  <Button variant="outline">
+                                    {getTranslatedText("cancel")}
+                                  </Button>
+                                  <Button 
+                                    variant="destructive" 
+                                    onClick={() => handleDeleteProduct(product.id)}
+                                  >
+                                    {getTranslatedText("delete")}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="profile" className="space-y-6">
+            <div className="glass rounded-lg p-8">
+              <h3 className="text-xl font-medium mb-6">{getTranslatedText("storeInfo")}</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="storeName" className="block text-sm font-medium mb-1">
+                      {getTranslatedText("storeName")}
+                    </label>
+                    <Input
+                      id="storeName"
+                      value={storeName}
+                      onChange={(e) => setStoreName(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="storePhone" className="block text-sm font-medium mb-1">
+                      {getTranslatedText("phoneNumber")}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="storePhone"
+                        type="tel"
+                        placeholder="212 6XX XXX XXX"
+                        value={storePhone}
+                        onChange={(e) => setStorePhone(e.target.value)}
+                        className="pl-12"
+                      />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        +
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      {getTranslatedText("storeLogo")}
+                    </label>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="h-24 w-24 rounded-lg border overflow-hidden bg-muted flex items-center justify-center">
+                        {storeLogo ? (
+                          <img 
+                            src={storeLogo} 
+                            alt={storeName} 
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-3xl font-bold text-center text-muted-foreground">
+                            {storeName?.substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="logo-upload" className="cursor-pointer">
+                          <div className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2 rounded-md transition-colors">
+                            <Upload className="h-4 w-4" />
+                            <span>{getTranslatedText("uploadLogo")}</span>
+                          </div>
+                          <input
+                            id="logo-upload"
+                            type="file"
+                            accept=".jpg,.jpeg"
+                            className="sr-only"
+                            onChange={handleLogoUpload}
+                          />
+                        </label>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          JPG/JPEG, max 2MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end">
+                <Button onClick={handleSaveProfile}>
+                  {getTranslatedText("saveChanges")}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="api" className="space-y-6">
+            <div className="glass rounded-lg p-8">
+              <h3 className="text-xl font-medium mb-6">{getTranslatedText("apiKeyManagement")}</h3>
+              
+              <div className="space-y-6">
+                <div className="flex flex-col">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">
+                      {getTranslatedText("apiKeyManagement")}
+                    </label>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                        onClick={handleCopyApiKey}
+                        disabled={!apiKey}
+                      >
+                        <Copy className="h-4 w-4" />
+                        <span className="sr-only md:not-sr-only">{getTranslatedText("copy")}</span>
+                      </Button>
+                      
+                      <Button 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                        onClick={handleGenerateApiKey}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        <span>{apiKey ? getTranslatedText("regenerateApiKey") : getTranslatedText("generateApiKey")}</span>
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-2 glass rounded-md p-3 font-mono text-sm">
+                    {apiKey || "••••••••••••••••••••••••••••••••"}
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    {getTranslatedText("apiKeyWarning")}
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h4 className="text-lg font-medium mb-4">{getTranslatedText("apiDocumentation")}</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        {getTranslatedText("apiEndpoint")}
+                      </label>
+                      <code className="block p-3 rounded-md glass text-sm">
+                        https://api.soukconnect.com/v1
+                      </code>
+                    </div>
+                    
+                    <Button asChild>
+                      <Link to="/seller/api-docs">
+                        <Code className="h-5 w-5 mr-2" />
+                        {getTranslatedText("apiDocs")}
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+};
+
+export default SellerDashboard;
