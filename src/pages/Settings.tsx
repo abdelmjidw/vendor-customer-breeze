@@ -151,25 +151,7 @@ const Settings = () => {
             </div>
             
             {/* Account Settings (Placeholder for future implementation) */}
-            <div className="glass rounded-xl p-6">
-              <h2 className="text-xl font-medium mb-4">
-                {language === 'ar' ? 'تفضيلات الحساب' :
-                 language === 'fr' ? 'Préférences du compte' : 'Account Preferences'}
-              </h2>
-              <p className="text-muted-foreground mb-4">
-                {language === 'ar' ? 'إدارة إعدادات وتفضيلات حسابك' :
-                 language === 'fr' ? 'Gérez les paramètres et préférences de votre compte' : 
-                 'Manage your account settings and preferences'}
-              </p>
-              <Button variant="outline" onClick={() => toast.info(
-                language === 'ar' ? 'هذه الميزة قادمة قريبا' :
-                language === 'fr' ? 'Cette fonctionnalité sera bientôt disponible' : 
-                'This feature is coming soon'
-              )}>
-                {language === 'ar' ? 'إدارة الحساب' :
-                 language === 'fr' ? 'Gérer le compte' : 'Manage Account'}
-              </Button>
-            </div>
+
           </div>
         </div>
       </main>
